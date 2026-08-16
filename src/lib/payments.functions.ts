@@ -63,10 +63,14 @@ export const savePayplusCredentials = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: Record<string, string | null> = {};
-    const a = clean(data.api_key); if (a !== undefined) patch.payplus_api_key = a;
-    const s = clean(data.secret_key); if (s !== undefined) patch.payplus_secret_key = s;
-    const t = clean(data.terminal_uid); if (t !== undefined) patch.payplus_terminal_uid = t;
-    const p = clean(data.payment_page_uid); if (p !== undefined) patch.payplus_payment_page_uid = p;
+    const a = clean(data.api_key);
+    if (a !== undefined) patch.payplus_api_key = a;
+    const s = clean(data.secret_key);
+    if (s !== undefined) patch.payplus_secret_key = s;
+    const t = clean(data.terminal_uid);
+    if (t !== undefined) patch.payplus_terminal_uid = t;
+    const p = clean(data.payment_page_uid);
+    if (p !== undefined) patch.payplus_payment_page_uid = p;
 
     const { error } = await supabaseAdmin
       .from("organization_payment_credentials")

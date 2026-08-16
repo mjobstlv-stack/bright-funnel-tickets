@@ -22,9 +22,11 @@
 ### Task 1: Scaffold project config files
 
 **Files:**
+
 - Create: `package.json`, `vite.config.ts`, `tsconfig.json`, `eslint.config.js`, `.prettierrc`, `.prettierignore`, `bunfig.toml`, `.gitignore`, `components.json`
 
 **Interfaces:**
+
 - Produces: an `npm install`-able project skeleton that later tasks add `src/` into.
 
 - [ ] **Step 1: Write `package.json`**
@@ -195,9 +197,11 @@ git commit -m "Scaffold project config"
 ### Task 2: Copy shared infrastructure (integrations, lib, hooks, assets, styles)
 
 **Files:**
+
 - Create: `src/integrations/**`, `src/lib/*` (kept subset), `src/hooks/use-mobile.tsx`, `src/assets/**`, `src/styles.css`
 
 **Interfaces:**
+
 - Consumes: nothing (leaf infrastructure layer).
 - Produces: `@/integrations/supabase/client`, `@/integrations/supabase/client.server`, `@/integrations/supabase/auth-middleware` (`requireSupabaseAuth`), `@/integrations/supabase/auth-attacher` (`attachSupabaseAuth`), `@/integrations/supabase/types`, `@/lib/auth` (`useAuth`, `AuthProvider`), `@/lib/i18n` (`useLang`, `LanguageProvider`), `@/lib/utils` (`cn`), `@/lib/events.functions`, `@/lib/orders.functions`, `@/lib/payments.functions`, `@/lib/requests.functions`, `@/lib/ai-content.functions`, `@/lib/ai-page.functions`, `@/lib/meet.functions`, `@/lib/team.functions`, `@/lib/team.server`, `@/lib/admin.functions`, `@/lib/admin.server`, `@/lib/error-capture`, `@/lib/error-page`, `@/lib/lovable-error-reporting` — all consumed by Task 4/5 route files.
 
@@ -257,9 +261,11 @@ git commit -m "Copy shared infra: integrations, lib, hooks, assets, styles"
 ### Task 3: Copy UI primitives and feature components
 
 **Files:**
+
 - Create: `src/components/ui/**` (all except `chart.tsx`), `src/components/event/**` (all except `EventOpsTab.tsx`), `src/components/checkout/CheckoutDialog.tsx`, `src/components/checkout/RequestDialog.tsx`, `src/components/landing/**`
 
 **Interfaces:**
+
 - Consumes: `@/lib/utils` (`cn`) from Task 2.
 - Produces: `@/components/ui/*` (shadcn primitives), `@/components/event/*`, `@/components/checkout/CheckoutDialog`, `@/components/checkout/RequestDialog`, `@/components/landing/Landing`, `@/components/landing/TermsPage` — consumed by Task 4/5 routes.
 
@@ -325,9 +331,11 @@ git commit -m "Copy UI primitives, event, checkout, and landing components"
 ### Task 4: Write the trimmed sidebar
 
 **Files:**
+
 - Create: `src/components/app-sidebar.tsx`
 
 **Interfaces:**
+
 - Consumes: `@/lib/i18n` (`useLang`), `@/lib/admin.functions` (`amIPlatformAdmin`), `@/components/ui/sidebar` (from Task 3).
 - Produces: `AppSidebar` component, consumed by `_authenticated/route.tsx` in Task 5.
 
@@ -336,14 +344,7 @@ git commit -m "Copy UI primitives, event, checkout, and landing components"
 ```tsx
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import {
-  Calendar,
-  CalendarDays,
-  Home,
-  ShieldAlert,
-  ShieldCheck,
-  UserCog,
-} from "lucide-react";
+import { Calendar, CalendarDays, Home, ShieldAlert, ShieldCheck, UserCog } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -363,7 +364,18 @@ import logoAsset from "@/assets/eventos-logo.svg.asset.json";
 import { useLang } from "@/lib/i18n";
 import { amIPlatformAdmin } from "@/lib/admin.functions";
 
-type Item = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; exact?: boolean; children?: Array<{ to: string; label: string; icon: React.ComponentType<{ className?: string }>; exact?: boolean }> };
+type Item = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+  children?: Array<{
+    to: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    exact?: boolean;
+  }>;
+};
 
 export function AppSidebar() {
   const { t, dir } = useLang();
@@ -394,7 +406,14 @@ export function AppSidebar() {
           to: "/events",
           label: t("כל האירועים", "All events"),
           icon: Calendar,
-          children: [{ to: "/events/new", label: t("אירוע חדש", "New event"), icon: CalendarDays, exact: true }],
+          children: [
+            {
+              to: "/events/new",
+              label: t("אירוע חדש", "New event"),
+              icon: CalendarDays,
+              exact: true,
+            },
+          ],
         },
         { to: "/reviews", label: t("אישורי כניסה", "Entry approvals"), icon: ShieldCheck },
       ],
@@ -404,7 +423,9 @@ export function AppSidebar() {
   if (isPlatformAdmin) {
     groups.push({
       label: t("ניהול מערכת", "System admin"),
-      items: [{ to: "/admin", label: t("לקוחות ותשלומים", "Customers & billing"), icon: ShieldAlert }],
+      items: [
+        { to: "/admin", label: t("לקוחות ותשלומים", "Customers & billing"), icon: ShieldAlert },
+      ],
     });
   }
 
@@ -423,7 +444,11 @@ export function AppSidebar() {
               <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild isActive={isActive(item.to, item.exact)} tooltip={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.to, item.exact)}
+                      tooltip={item.label}
+                    >
                       <Link to={item.to}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
@@ -433,7 +458,10 @@ export function AppSidebar() {
                       <SidebarMenuSub>
                         {item.children.map((child) => (
                           <SidebarMenuSubItem key={child.to}>
-                            <SidebarMenuSubButton asChild isActive={isActive(child.to, child.exact)}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={isActive(child.to, child.exact)}
+                            >
                               <Link to={child.to}>
                                 <child.icon className="h-3.5 w-3.5" />
                                 <span>{child.label}</span>
@@ -473,10 +501,12 @@ git commit -m "Write trimmed sidebar nav (drop staff/inventory/reservations/fina
 ### Task 5: Copy routes, then apply the three coupling edits
 
 **Files:**
+
 - Create: `src/__root.tsx`, `src/router.tsx`, `src/server.ts`, `src/start.ts`, `src/routes/_authenticated/route.tsx`, `src/routes/_authenticated/events.index.tsx`, `src/routes/_authenticated/events.new.tsx`, `src/routes/_authenticated/onboarding.tsx`, `src/routes/_authenticated/settings.tsx`, `src/routes/_authenticated/team.tsx`, `src/routes/_authenticated/reviews.tsx`, `src/routes/_authenticated/admin.tsx`, `src/routes/e.$slug.tsx`, `src/routes/e.$slug.checkout.tsx`, `src/routes/order.$orderNumber.tsx`, `src/routes/auth.tsx`, `src/routes/reset-password.tsx`, `src/routes/index.tsx`, `src/routes/en.tsx`, `src/routes/terms.tsx`, `src/routes/en.terms.tsx`
 - Modify (copy then edit): `src/routes/_authenticated/dashboard.tsx`, `src/routes/_authenticated/events.$id.tsx`, `src/routes/e.$slug.index.tsx`
 
 **Interfaces:**
+
 - Consumes: everything from Tasks 2–4 (`@/integrations/supabase/*`, `@/lib/*`, `@/components/*`).
 - Produces: the full route tree — TanStack Router's Vite plugin (already wired in `vite.config.ts` via `@lovable.dev/vite-tanstack-config`) auto-generates `src/routeTree.gen.ts` from these files the first time `npm run dev` or `npm run build` runs. **Do not hand-write or copy `routeTree.gen.ts` from the source repo** — it encodes the source app's full (larger) route set and will not match this app's routes.
 
@@ -515,39 +545,46 @@ cp "$SRC/src/routes/e.\$slug.index.tsx" src/routes/
 - [ ] **Step 3: Edit `src/routes/_authenticated/events.$id.tsx`** — remove the Ops tab
 
 Remove the import (currently line 15):
+
 ```tsx
 import { EventOpsTab } from "@/components/event/EventOpsTab";
 ```
 
 Change the `TabsList` from:
+
 ```tsx
           <TabsTrigger value="orders">{t("הזמנות", "Orders")} ({orders.length})</TabsTrigger>
           <TabsTrigger value="ops">{t("תפעול", "Operations")}</TabsTrigger>
           <TabsTrigger value="budget">{t("תקציב", "Budget")}</TabsTrigger>
 ```
+
 to:
+
 ```tsx
           <TabsTrigger value="orders">{t("הזמנות", "Orders")} ({orders.length})</TabsTrigger>
           <TabsTrigger value="budget">{t("תקציב", "Budget")}</TabsTrigger>
 ```
 
 Remove the `ops` `TabsContent` block entirely:
-```tsx
-        <TabsContent value="ops" className="mt-6">
-          <EventOpsTab eventId={ev.id} currency={ev.currency} />
-        </TabsContent>
 
+```tsx
+<TabsContent value="ops" className="mt-6">
+  <EventOpsTab eventId={ev.id} currency={ev.currency} />
+</TabsContent>
 ```
+
 (the blank line after it stays — just delete these 3 content lines plus the blank line that separates them from the `budget` block, so `orders` `TabsContent` is immediately followed by `budget` `TabsContent` with one blank line between, matching the existing style).
 
 - [ ] **Step 4: Edit `src/routes/e.$slug.index.tsx`** — remove the booking sale-mode branch
 
 Remove the import (currently line 10):
+
 ```tsx
 import { EventBookingCard } from "@/components/checkout/EventBookingCard";
 ```
 
 Change:
+
 ```tsx
   const isBooking = ev.sale_mode === "booking" && !!ev.booking_slug;
   const ticketCard = isBooking ? (
@@ -555,7 +592,9 @@ Change:
   ) : (
     <Card className="p-5 border-black/10 shadow-sm bg-white text-foreground">
 ```
+
 to:
+
 ```tsx
   const ticketCard = (
     <Card className="p-5 border-black/10 shadow-sm bg-white text-foreground">
@@ -566,138 +605,214 @@ And remove the now-dangling closing `)` that paired with the ternary (the block 
 - [ ] **Step 5: Edit `src/routes/_authenticated/dashboard.tsx`** — remove the inventory low-stock stat (the only non-ticketing table this file touches)
 
 Change the import:
+
 ```tsx
 import {
-  Calendar, Plus, Ticket, DollarSign, Users, TrendingUp, Wallet,
-  ShieldCheck, ArrowUpRight, Clock, Boxes, Receipt,
+  Calendar,
+  Plus,
+  Ticket,
+  DollarSign,
+  Users,
+  TrendingUp,
+  Wallet,
+  ShieldCheck,
+  ArrowUpRight,
+  Clock,
+  Boxes,
+  Receipt,
 } from "lucide-react";
 ```
+
 to:
+
 ```tsx
 import {
-  Calendar, Plus, Ticket, DollarSign, Users, TrendingUp, Wallet,
-  ShieldCheck, ArrowUpRight, Clock, Receipt,
+  Calendar,
+  Plus,
+  Ticket,
+  DollarSign,
+  Users,
+  TrendingUp,
+  Wallet,
+  ShieldCheck,
+  ArrowUpRight,
+  Clock,
+  Receipt,
 } from "lucide-react";
 ```
 
 Change the stats state:
+
 ```tsx
-  const [stats, setStats] = useState({ revenue: 0, ticketsSold: 0, orders: 0, expenses: 0, pendingRequests: 0, lowStock: 0 });
+const [stats, setStats] = useState({
+  revenue: 0,
+  ticketsSold: 0,
+  orders: 0,
+  expenses: 0,
+  pendingRequests: 0,
+  lowStock: 0,
+});
 ```
+
 to:
+
 ```tsx
-  const [stats, setStats] = useState({ revenue: 0, ticketsSold: 0, orders: 0, expenses: 0, pendingRequests: 0 });
+const [stats, setStats] = useState({
+  revenue: 0,
+  ticketsSold: 0,
+  orders: 0,
+  expenses: 0,
+  pendingRequests: 0,
+});
 ```
 
 Change the parallel query block:
+
 ```tsx
-        const [{ data: ords }, tixRes, expRes, reqRes, recentRes, stockRes] = await Promise.all([
-          supabase
-          .from("orders")
-          .select("total,status,event_id")
-          .in("event_id", ids)
-            .eq("status", "paid"),
-          supabase
-            .from("tickets")
-            .select("id", { count: "exact", head: true })
-            .in("event_id", ids),
-          supabase
-            .from("event_expenses")
-            .select("amount")
-            .in("event_id", ids),
-          supabase
-            .from("ticket_requests")
-            .select("id", { count: "exact", head: true })
-            .in("event_id", ids)
-            .eq("status", "pending"),
-          supabase
-            .from("orders")
-            .select("id,order_number,total,currency,status,buyer_name,created_at,event_id")
-            .in("event_id", ids)
-            .order("created_at", { ascending: false })
-            .limit(5),
-          supabase
-            .from("event_inventory")
-            .select("current_qty, inventory_items!inner(min_threshold, is_active)")
-            .in("event_id", ids),
-        ]);
-        const revenue = (ords ?? []).reduce((a, b) => a + Number(b.total), 0);
-        const expenses = (expRes.data ?? []).reduce((a, b) => a + Number(b.amount), 0);
-        const stockRows = (stockRes.data ?? []) as unknown as Array<{ current_qty: number; inventory_items: { min_threshold: number; is_active: boolean } }>;
-        const lowStock = stockRows.filter((r) => r.inventory_items?.is_active && Number(r.current_qty) <= Number(r.inventory_items.min_threshold)).length;
-        setStats({
-          revenue,
-          ticketsSold: tixRes.count ?? 0,
-          orders: (ords ?? []).length,
-          expenses,
-          pendingRequests: reqRes.count ?? 0,
-          lowStock,
-        });
+const [{ data: ords }, tixRes, expRes, reqRes, recentRes, stockRes] = await Promise.all([
+  supabase.from("orders").select("total,status,event_id").in("event_id", ids).eq("status", "paid"),
+  supabase.from("tickets").select("id", { count: "exact", head: true }).in("event_id", ids),
+  supabase.from("event_expenses").select("amount").in("event_id", ids),
+  supabase
+    .from("ticket_requests")
+    .select("id", { count: "exact", head: true })
+    .in("event_id", ids)
+    .eq("status", "pending"),
+  supabase
+    .from("orders")
+    .select("id,order_number,total,currency,status,buyer_name,created_at,event_id")
+    .in("event_id", ids)
+    .order("created_at", { ascending: false })
+    .limit(5),
+  supabase
+    .from("event_inventory")
+    .select("current_qty, inventory_items!inner(min_threshold, is_active)")
+    .in("event_id", ids),
+]);
+const revenue = (ords ?? []).reduce((a, b) => a + Number(b.total), 0);
+const expenses = (expRes.data ?? []).reduce((a, b) => a + Number(b.amount), 0);
+const stockRows = (stockRes.data ?? []) as unknown as Array<{
+  current_qty: number;
+  inventory_items: { min_threshold: number; is_active: boolean };
+}>;
+const lowStock = stockRows.filter(
+  (r) =>
+    r.inventory_items?.is_active &&
+    Number(r.current_qty) <= Number(r.inventory_items.min_threshold),
+).length;
+setStats({
+  revenue,
+  ticketsSold: tixRes.count ?? 0,
+  orders: (ords ?? []).length,
+  expenses,
+  pendingRequests: reqRes.count ?? 0,
+  lowStock,
+});
 ```
+
 to:
+
 ```tsx
-        const [{ data: ords }, tixRes, expRes, reqRes, recentRes] = await Promise.all([
-          supabase
-          .from("orders")
-          .select("total,status,event_id")
-          .in("event_id", ids)
-            .eq("status", "paid"),
-          supabase
-            .from("tickets")
-            .select("id", { count: "exact", head: true })
-            .in("event_id", ids),
-          supabase
-            .from("event_expenses")
-            .select("amount")
-            .in("event_id", ids),
-          supabase
-            .from("ticket_requests")
-            .select("id", { count: "exact", head: true })
-            .in("event_id", ids)
-            .eq("status", "pending"),
-          supabase
-            .from("orders")
-            .select("id,order_number,total,currency,status,buyer_name,created_at,event_id")
-            .in("event_id", ids)
-            .order("created_at", { ascending: false })
-            .limit(5),
-        ]);
-        const revenue = (ords ?? []).reduce((a, b) => a + Number(b.total), 0);
-        const expenses = (expRes.data ?? []).reduce((a, b) => a + Number(b.amount), 0);
-        setStats({
-          revenue,
-          ticketsSold: tixRes.count ?? 0,
-          orders: (ords ?? []).length,
-          expenses,
-          pendingRequests: reqRes.count ?? 0,
-        });
+const [{ data: ords }, tixRes, expRes, reqRes, recentRes] = await Promise.all([
+  supabase.from("orders").select("total,status,event_id").in("event_id", ids).eq("status", "paid"),
+  supabase.from("tickets").select("id", { count: "exact", head: true }).in("event_id", ids),
+  supabase.from("event_expenses").select("amount").in("event_id", ids),
+  supabase
+    .from("ticket_requests")
+    .select("id", { count: "exact", head: true })
+    .in("event_id", ids)
+    .eq("status", "pending"),
+  supabase
+    .from("orders")
+    .select("id,order_number,total,currency,status,buyer_name,created_at,event_id")
+    .in("event_id", ids)
+    .order("created_at", { ascending: false })
+    .limit(5),
+]);
+const revenue = (ords ?? []).reduce((a, b) => a + Number(b.total), 0);
+const expenses = (expRes.data ?? []).reduce((a, b) => a + Number(b.amount), 0);
+setStats({
+  revenue,
+  ticketsSold: tixRes.count ?? 0,
+  orders: (ords ?? []).length,
+  expenses,
+  pendingRequests: reqRes.count ?? 0,
+});
 ```
 
 Change the subtitle copy:
+
 ```tsx
-            {t("מבט חי על הכנסות, כרטיסים, מלאי ובקשות.", "Live view of revenue, tickets, stock and requests.")}
+{
+  t(
+    "מבט חי על הכנסות, כרטיסים, מלאי ובקשות.",
+    "Live view of revenue, tickets, stock and requests.",
+  );
+}
 ```
+
 to:
+
 ```tsx
-            {t("מבט חי על הכנסות, כרטיסים ובקשות.", "Live view of revenue, tickets and requests.")}
+{
+  t("מבט חי על הכנסות, כרטיסים ובקשות.", "Live view of revenue, tickets and requests.");
+}
 ```
 
 Change the KPI grid from 4 columns with the stock stat, to 3 columns without it:
+
 ```tsx
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Stat icon={<Ticket className="h-4 w-4" />} label={t("כרטיסים שהונפקו", "Tickets issued")} value={stats.ticketsSold.toLocaleString()} tone="sky" />
-        <Stat icon={<Users className="h-4 w-4" />} label={t("הזמנות ששולמו", "Paid orders")} value={stats.orders.toLocaleString()} tone="violet" />
-        <Stat icon={<ShieldCheck className="h-4 w-4" />} label={t("בקשות ממתינות", "Pending requests")} value={stats.pendingRequests.toLocaleString()} tone="rose" />
-        <Stat icon={<Boxes className="h-4 w-4" />} label={t("פריטים בחוסר", "Items low on stock")} value={stats.lowStock.toLocaleString()} tone={stats.lowStock > 0 ? "rose" : "sky"} />
-      </div>
+<div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <Stat
+    icon={<Ticket className="h-4 w-4" />}
+    label={t("כרטיסים שהונפקו", "Tickets issued")}
+    value={stats.ticketsSold.toLocaleString()}
+    tone="sky"
+  />
+  <Stat
+    icon={<Users className="h-4 w-4" />}
+    label={t("הזמנות ששולמו", "Paid orders")}
+    value={stats.orders.toLocaleString()}
+    tone="violet"
+  />
+  <Stat
+    icon={<ShieldCheck className="h-4 w-4" />}
+    label={t("בקשות ממתינות", "Pending requests")}
+    value={stats.pendingRequests.toLocaleString()}
+    tone="rose"
+  />
+  <Stat
+    icon={<Boxes className="h-4 w-4" />}
+    label={t("פריטים בחוסר", "Items low on stock")}
+    value={stats.lowStock.toLocaleString()}
+    tone={stats.lowStock > 0 ? "rose" : "sky"}
+  />
+</div>
 ```
+
 to:
+
 ```tsx
-      <div className="grid sm:grid-cols-3 gap-4">
-        <Stat icon={<Ticket className="h-4 w-4" />} label={t("כרטיסים שהונפקו", "Tickets issued")} value={stats.ticketsSold.toLocaleString()} tone="sky" />
-        <Stat icon={<Users className="h-4 w-4" />} label={t("הזמנות ששולמו", "Paid orders")} value={stats.orders.toLocaleString()} tone="violet" />
-        <Stat icon={<ShieldCheck className="h-4 w-4" />} label={t("בקשות ממתינות", "Pending requests")} value={stats.pendingRequests.toLocaleString()} tone="rose" />
-      </div>
+<div className="grid sm:grid-cols-3 gap-4">
+  <Stat
+    icon={<Ticket className="h-4 w-4" />}
+    label={t("כרטיסים שהונפקו", "Tickets issued")}
+    value={stats.ticketsSold.toLocaleString()}
+    tone="sky"
+  />
+  <Stat
+    icon={<Users className="h-4 w-4" />}
+    label={t("הזמנות ששולמו", "Paid orders")}
+    value={stats.orders.toLocaleString()}
+    tone="violet"
+  />
+  <Stat
+    icon={<ShieldCheck className="h-4 w-4" />}
+    label={t("בקשות ממתינות", "Pending requests")}
+    value={stats.pendingRequests.toLocaleString()}
+    tone="rose"
+  />
+</div>
 ```
 
 - [ ] **Step 6: Verify no dropped-module table names remain**
@@ -711,7 +826,7 @@ Expected: no output (both were only referenced from the two files just edited).
 - [ ] **Step 7: Verify route file count**
 
 Run: `find src/routes -type f | wc -l`
-Expected: `20` (10 `_authenticated/*`: route, dashboard, events.index, events.$id, events.new, onboarding, settings, team, reviews, admin + 4 `e.$slug*`/`order.*` + 6 top-level: `auth.tsx`, `reset-password.tsx`, `index.tsx`, `en.tsx`, `terms.tsx`, `en.terms.tsx` = 20).
+Expected: `20` (10 `_authenticated/*`: route, dashboard, events.index, events.$id, events.new, onboarding, settings, team, reviews, admin + 4 `e.$slug*`/`order.*`+ 6 top-level:`auth.tsx`, `reset-password.tsx`, `index.tsx`, `en.tsx`, `terms.tsx`, `en.terms.tsx` = 20).
 
 - [ ] **Step 8: Commit**
 
@@ -725,9 +840,11 @@ git commit -m "Copy routes; remove Ops tab, booking sale-mode, and inventory das
 ### Task 6: Install, configure environment, and get a clean build
 
 **Files:**
+
 - Create: `.env` (not committed — already in `.gitignore` from Task 1), `.env.example`
 
 **Interfaces:**
+
 - Consumes: everything from Tasks 1–5.
 - Produces: a working `npm run build` and `npm run lint`, and `node_modules` for local dev.
 
@@ -783,6 +900,7 @@ git commit -m "Add .env.example; app builds and lints clean"
 **Files:** none (verification only)
 
 **Interfaces:**
+
 - Consumes: the fully built app from Task 6.
 
 - [ ] **Step 1: Start the dev server in the background**

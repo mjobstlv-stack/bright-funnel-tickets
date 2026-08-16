@@ -22,7 +22,10 @@ export function hasInlineIcons(text?: string | null) {
 
 /** Strips tokens — useful for meta descriptions, titles in <head>, alt text. */
 export function stripInlineIcons(text?: string | null) {
-  return (text ?? "").replace(TOKEN, "").replace(/\s{2,}/g, " ").trim();
+  return (text ?? "")
+    .replace(TOKEN, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 /**

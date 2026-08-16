@@ -53,11 +53,22 @@ export function localToIso(date: string, time: string): string | null {
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
-export function buildDayHours(from: string, to: string, start: string, end: string, existing: DayHours[]): DayHours[] {
+export function buildDayHours(
+  from: string,
+  to: string,
+  start: string,
+  end: string,
+  existing: DayHours[],
+): DayHours[] {
   const byDate = new Map(existing.map((d) => [d.date, d]));
   return rangeDates(from, to).map((date) => {
     const prev = byDate.get(date);
-    return { date, start: prev?.start || start, end: prev?.end || end, closed: prev?.closed ?? false };
+    return {
+      date,
+      start: prev?.start || start,
+      end: prev?.end || end,
+      closed: prev?.closed ?? false,
+    };
   });
 }
 
@@ -76,7 +87,11 @@ export function EventDaysField({
   endAt: string | null;
   dayHours: DayHours[];
   errors?: { start_at?: string; end_at?: string };
-  onChange: (patch: { start_at: string | null; end_at: string | null; day_hours: DayHours[] }) => void;
+  onChange: (patch: {
+    start_at: string | null;
+    end_at: string | null;
+    day_hours: DayHours[];
+  }) => void;
 }) {
   const { t } = useLang();
 
@@ -126,7 +141,12 @@ export function EventDaysField({
 
   const weekday = (date: string) => {
     const [y, m, d] = date.split("-").map(Number);
-    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("he-IL", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("he-IL", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      timeZone: "UTC",
+    });
   };
 
   return (
@@ -143,7 +163,9 @@ export function EventDaysField({
             type="date"
             aria-invalid={!!errors?.start_at}
             value={fromDate}
-            onChange={(e) => setRange(e.target.value, toDate && toDate >= e.target.value ? toDate : e.target.value)}
+            onChange={(e) =>
+              setRange(e.target.value, toDate && toDate >= e.target.value ? toDate : e.target.value)
+            }
           />
           {errors?.start_at && <p className="text-xs text-red-600 mt-1">{errors.start_at}</p>}
         </div>
@@ -163,11 +185,19 @@ export function EventDaysField({
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <Label className="mb-1.5 block">{t("משעה (לכל הימים)", "From (all days)")}</Label>
-          <Input type="time" value={bulkStart} onChange={(e) => setBulkHours(e.target.value, bulkEnd)} />
+          <Input
+            type="time"
+            value={bulkStart}
+            onChange={(e) => setBulkHours(e.target.value, bulkEnd)}
+          />
         </div>
         <div>
           <Label className="mb-1.5 block">{t("עד שעה (לכל הימים)", "To (all days)")}</Label>
-          <Input type="time" value={bulkEnd} onChange={(e) => setBulkHours(bulkStart, e.target.value)} />
+          <Input
+            type="time"
+            value={bulkEnd}
+            onChange={(e) => setBulkHours(bulkStart, e.target.value)}
+          />
         </div>
       </div>
 
@@ -175,9 +205,18 @@ export function EventDaysField({
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
             <div className="text-xs text-muted-foreground">
-              {t("עריכה נקודתית לימים ספציפיים — ניתן לשנות שעות או לסמן יום כסגור.", "Per-day overrides — change the hours or mark a day as closed.")}
+              {t(
+                "עריכה נקודתית לימים ספציפיים — ניתן לשנות שעות או לסמן יום כסגור.",
+                "Per-day overrides — change the hours or mark a day as closed.",
+              )}
             </div>
-            <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={applyFirstToAll}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+              onClick={applyFirstToAll}
+            >
               <Wand2 className="h-3.5 w-3.5 me-1" /> {t("החל על כל הימים", "Apply to all days")}
             </Button>
           </div>
@@ -201,8 +240,13 @@ export function EventDaysField({
                   onChange={(e) => patchDay(d.date, { end: e.target.value })}
                 />
                 <div className="ms-auto flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{d.closed ? t("סגור", "Closed") : t("פעיל", "Open")}</span>
-                  <Switch checked={!d.closed} onCheckedChange={(v) => patchDay(d.date, { closed: !v })} />
+                  <span className="text-xs text-muted-foreground">
+                    {d.closed ? t("סגור", "Closed") : t("פעיל", "Open")}
+                  </span>
+                  <Switch
+                    checked={!d.closed}
+                    onCheckedChange={(v) => patchDay(d.date, { closed: !v })}
+                  />
                 </div>
               </div>
             ))}

@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Landing } from "@/components/landing/Landing";
 
 const TITLE = "Event OS — מערכת ההפעלה לאירועים";
-const DESC = "כרטוס, שמירת מקום במסעדה, סידור עבודה, שעון נוכחות, מלאי, קופה ו-P&L חי — מערכת אחת לניהול אירועים ומסעדות.";
+const DESC =
+  "כרטוס, שמירת מקום במסעדה, סידור עבודה, שעון נוכחות, מלאי, קופה ו-P&L חי — מערכת אחת לניהול אירועים ומסעדות.";
 
 export const Route = createFileRoute("/")({
   head: () => ({

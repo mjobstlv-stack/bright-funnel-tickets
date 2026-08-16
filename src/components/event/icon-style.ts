@@ -19,8 +19,14 @@ export function parseIconValue(value?: string | null): { icon: string; style: Ic
     const [k, v] = part.split("=");
     if (!k || !v) continue;
     if (k === "c" && /^#[0-9a-f]{3,8}$/i.test(v)) style.color = v;
-    if (k === "s") { const n = Number(v); if (Number.isFinite(n) && n > 0 && n <= 4) style.size = n; }
-    if (k === "g") { const n = Number(v); if (Number.isFinite(n) && n >= 0 && n <= 3) style.gap = n; }
+    if (k === "s") {
+      const n = Number(v);
+      if (Number.isFinite(n) && n > 0 && n <= 4) style.size = n;
+    }
+    if (k === "g") {
+      const n = Number(v);
+      if (Number.isFinite(n) && n >= 0 && n <= 3) style.gap = n;
+    }
   }
   return { icon, style };
 }
@@ -54,7 +60,10 @@ export function iconCss(style: IconStyle, baseEm = 1): React.CSSProperties {
 }
 
 /** Inline CSS for the wrapper (side spacing). */
-export function iconGapCss(style: IconStyle, sides: { start: boolean; end: boolean }): React.CSSProperties {
+export function iconGapCss(
+  style: IconStyle,
+  sides: { start: boolean; end: boolean },
+): React.CSSProperties {
   if (style.gap == null) return {};
   const em = `${round(style.gap)}em`;
   return {

@@ -12,7 +12,9 @@ export const getOrderByToken = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: order, error } = await supabaseAdmin
       .from("orders")
-      .select("id, order_number, event_id, buyer_email, buyer_name, status, total, currency, created_at, access_token")
+      .select(
+        "id, order_number, event_id, buyer_email, buyer_name, status, total, currency, created_at, access_token",
+      )
       .eq("order_number", data.orderNumber)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -88,10 +90,15 @@ const CreateOrderInput = z.object({
   buyerEmail: z.string().email(),
   buyerPhone: z.string().nullable().optional(),
   currency: z.string().min(1),
-  items: z.array(z.object({
-    ticketTypeId: z.string().uuid(),
-    quantity: z.number().int().min(1),
-  })).min(1).max(20),
+  items: z
+    .array(
+      z.object({
+        ticketTypeId: z.string().uuid(),
+        quantity: z.number().int().min(1),
+      }),
+    )
+    .min(1)
+    .max(20),
 });
 
 export const createPendingOrder = createServerFn({ method: "POST" })
@@ -120,10 +127,13 @@ export const createPendingOrder = createServerFn({ method: "POST" })
     for (const it of data.items) {
       const tt = ttMap.get(it.ticketTypeId);
       if (!tt) throw new Error("Invalid ticket type");
-      if (tt.event_id !== data.eventId) throw new Error("Ticket type does not belong to this event");
+      if (tt.event_id !== data.eventId)
+        throw new Error("Ticket type does not belong to this event");
       if (!tt.is_active) throw new Error("Ticket type is not on sale");
-      if (tt.min_per_order && it.quantity < tt.min_per_order) throw new Error("Below minimum per order");
-      if (tt.max_per_order && it.quantity > tt.max_per_order) throw new Error("Above maximum per order");
+      if (tt.min_per_order && it.quantity < tt.min_per_order)
+        throw new Error("Below minimum per order");
+      if (tt.max_per_order && it.quantity > tt.max_per_order)
+        throw new Error("Above maximum per order");
     }
 
     // Atomically reserve inventory; roll back all reservations on failure.
@@ -141,7 +151,10 @@ export const createPendingOrder = createServerFn({ method: "POST" })
       }
     } catch (err) {
       for (const r of reserved) {
-        await supabaseAdmin.rpc("release_ticket_inventory", { _ticket_type_id: r.ticketTypeId, _qty: r.quantity });
+        await supabaseAdmin.rpc("release_ticket_inventory", {
+          _ticket_type_id: r.ticketTypeId,
+          _qty: r.quantity,
+        });
       }
       throw err;
     }
@@ -176,7 +189,10 @@ export const createPendingOrder = createServerFn({ method: "POST" })
       .single();
     if (oErr) {
       for (const r of reserved) {
-        await supabaseAdmin.rpc("release_ticket_inventory", { _ticket_type_id: r.ticketTypeId, _qty: r.quantity });
+        await supabaseAdmin.rpc("release_ticket_inventory", {
+          _ticket_type_id: r.ticketTypeId,
+          _qty: r.quantity,
+        });
       }
       throw new Error(oErr.message);
     }
@@ -190,17 +206,25 @@ export const createPendingOrder = createServerFn({ method: "POST" })
     const { error: oiErr } = await supabaseAdmin.from("order_items").insert(rows);
     if (oiErr) throw new Error(oiErr.message);
 
-    return { id: order.id, order_number: order.order_number, access_token: order.access_token as string };
+    return {
+      id: order.id,
+      order_number: order.order_number,
+      access_token: order.access_token as string,
+    };
   });
 
 const IssueTicketsInput = z.object({
   orderId: z.string().uuid(),
   token: z.string().uuid(),
   holderName: z.string().min(1),
-  items: z.array(z.object({
-    ticketTypeId: z.string().uuid(),
-    quantity: z.number().int().min(1),
-  })).min(1),
+  items: z
+    .array(
+      z.object({
+        ticketTypeId: z.string().uuid(),
+        quantity: z.number().int().min(1),
+      }),
+    )
+    .min(1),
 });
 
 export const issueTicketsForOrder = createServerFn({ method: "POST" })
@@ -231,9 +255,11 @@ export const issueTicketsForOrder = createServerFn({ method: "POST" })
       .eq("order_id", order.id);
     if (oiErr) throw new Error(oiErr.message);
     const orderMap = new Map<string, number>();
-    for (const oi of oItems ?? []) orderMap.set(oi.ticket_type_id, (orderMap.get(oi.ticket_type_id) ?? 0) + oi.quantity);
+    for (const oi of oItems ?? [])
+      orderMap.set(oi.ticket_type_id, (orderMap.get(oi.ticket_type_id) ?? 0) + oi.quantity);
     const reqMap = new Map<string, number>();
-    for (const it of data.items) reqMap.set(it.ticketTypeId, (reqMap.get(it.ticketTypeId) ?? 0) + it.quantity);
+    for (const it of data.items)
+      reqMap.set(it.ticketTypeId, (reqMap.get(it.ticketTypeId) ?? 0) + it.quantity);
     if (orderMap.size !== reqMap.size) throw new Error("Items mismatch");
     for (const [k, v] of orderMap) if (reqMap.get(k) !== v) throw new Error("Items mismatch");
 

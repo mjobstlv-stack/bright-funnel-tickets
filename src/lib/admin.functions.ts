@@ -40,13 +40,17 @@ const NewTicketInput = z.object({
 
 const MemberInput = z.object({ memberId: z.string().uuid() });
 const MemberActiveInput = z.object({ memberId: z.string().uuid(), isActive: z.boolean() });
-const ResetInput = z.object({ email: z.string().email().max(160), redirectTo: z.string().url().max(400) });
+const ResetInput = z.object({
+  email: z.string().email().max(160),
+  redirectTo: z.string().url().max(400),
+});
 const InviteInput = z.object({ inviteId: z.string().uuid() });
-const ResendInviteInput = z.object({ inviteId: z.string().uuid(), redirectTo: z.string().url().max(400) });
+const ResendInviteInput = z.object({
+  inviteId: z.string().uuid(),
+  redirectTo: z.string().url().max(400),
+});
 
-type AdminClient = Awaited<
-  typeof import("@/integrations/supabase/client.server")
->["supabaseAdmin"];
+type AdminClient = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
 
 /** Append an entry to the system-admin action log (never blocks the action itself). */
 async function logAdminAction(
@@ -112,11 +116,15 @@ export const getAdminOverview = createServerFn({ method: "POST" })
         .order("created_at", { ascending: true }),
       supabaseAdmin
         .from("org_subscriptions")
-        .select("id, org_id, module, plan, status, amount, currency, provider, current_period_end, notes, updated_at"),
+        .select(
+          "id, org_id, module, plan, status, amount, currency, provider, current_period_end, notes, updated_at",
+        ),
       supabaseAdmin.from("org_modules").select("id, org_id, module, enabled"),
       supabaseAdmin
         .from("support_tickets")
-        .select("id, org_id, subject, body, area, priority, status, contact_email, internal_notes, created_at, resolved_at")
+        .select(
+          "id, org_id, subject, body, area, priority, status, contact_email, internal_notes, created_at, resolved_at",
+        )
         .order("created_at", { ascending: false })
         .limit(200),
       supabaseAdmin
@@ -177,7 +185,10 @@ export const setOrgModule = createServerFn({ method: "POST" })
     await requirePlatformAdmin(supabaseAdmin, context.userId);
     const { error } = await supabaseAdmin
       .from("org_modules")
-      .upsert({ org_id: data.orgId, module: data.module, enabled: data.enabled }, { onConflict: "org_id,module" });
+      .upsert(
+        { org_id: data.orgId, module: data.module, enabled: data.enabled },
+        { onConflict: "org_id,module" },
+      );
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -191,7 +202,10 @@ export const updateSupportTicket = createServerFn({ method: "POST" })
     const { id, ...patch } = data;
     const { error } = await supabaseAdmin
       .from("support_tickets")
-      .update({ ...patch, resolved_at: patch.status === "resolved" ? new Date().toISOString() : null })
+      .update({
+        ...patch,
+        resolved_at: patch.status === "resolved" ? new Date().toISOString() : null,
+      })
       .eq("id", id);
     if (error) throw new Error(error.message);
     return { ok: true };

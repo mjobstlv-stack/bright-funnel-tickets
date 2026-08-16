@@ -22,9 +22,19 @@ function EventsList() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: org } = await supabase.from("organizations").select("id").order("created_at", { ascending: true }).limit(1).maybeSingle();
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("id")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
       if (!org) return;
-      const { data } = await supabase.from("events").select("id,name,slug,status,start_at").eq("org_id", org.id).not("slug", "like", "restaurant-ops-%").order("created_at", { ascending: false });
+      const { data } = await supabase
+        .from("events")
+        .select("id,name,slug,status,start_at")
+        .eq("org_id", org.id)
+        .not("slug", "like", "restaurant-ops-%")
+        .order("created_at", { ascending: false });
       setRows(data ?? []);
     })();
   }, [user]);
@@ -35,7 +45,9 @@ function EventsList() {
         <h1 className="text-3xl font-display tracking-tight">{t("אירועים", "Events")}</h1>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild className="rounded-full text-muted-foreground">
-            <Link to="/events/new"><Plus className="h-4 w-4 mx-1" /> {t("ידני", "Manual")}</Link>
+            <Link to="/events/new">
+              <Plus className="h-4 w-4 mx-1" /> {t("ידני", "Manual")}
+            </Link>
           </Button>
           <Button onClick={() => setGenOpen(true)} className="rounded-full">
             <Sparkles className="h-4 w-4 mx-1" /> {t("אירוע חדש עם AI", "New event with AI")}
@@ -43,14 +55,30 @@ function EventsList() {
         </div>
       </div>
       <Card className="border-black/10 divide-y divide-black/5">
-        {rows.length === 0 && <div className="p-8 text-sm text-muted-foreground">{t("אין עדיין אירועים.", "No events yet.")}</div>}
+        {rows.length === 0 && (
+          <div className="p-8 text-sm text-muted-foreground">
+            {t("אין עדיין אירועים.", "No events yet.")}
+          </div>
+        )}
         {rows.map((r) => (
-          <Link key={r.id} to="/events/$id" params={{ id: r.id }} className="flex items-center justify-between p-4 hover:bg-black/[0.02]">
+          <Link
+            key={r.id}
+            to="/events/$id"
+            params={{ id: r.id }}
+            className="flex items-center justify-between p-4 hover:bg-black/[0.02]"
+          >
             <div>
               <div className="font-medium">{r.name}</div>
-              <div className="text-xs text-muted-foreground">/{r.slug} · {r.start_at ? new Date(r.start_at).toLocaleString() : t("ללא תאריך", "no date")}</div>
+              <div className="text-xs text-muted-foreground">
+                /{r.slug} ·{" "}
+                {r.start_at ? new Date(r.start_at).toLocaleString() : t("ללא תאריך", "no date")}
+              </div>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${r.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{r.status}</span>
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full ${r.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
+            >
+              {r.status}
+            </span>
           </Link>
         ))}
       </Card>

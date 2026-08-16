@@ -1,4 +1,10 @@
-import { createFileRoute, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +58,9 @@ function AuthLayout() {
 
   if (loading || !user || !checkedOrg) {
     return (
-      <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">{t("טוען…", "Loading…")}</div>
+      <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
+        {t("טוען…", "Loading…")}
+      </div>
     );
   }
 
@@ -66,7 +74,14 @@ function AuthLayout() {
             <img src={logoAsset.url} alt="Event OS" className="h-7 w-auto" />
             <div className="flex items-center gap-2 text-sm">
               <LanguageToggle />
-              <Button variant="ghost" size="sm" onClick={async () => { await signOut(); nav({ to: "/" }); }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async () => {
+                  await signOut();
+                  nav({ to: "/" });
+                }}
+              >
                 <LogOut className="h-4 w-4 mx-1.5" /> {t("התנתקות", "Sign out")}
               </Button>
             </div>
@@ -90,9 +105,18 @@ function AuthLayout() {
               {org && <span className="hidden sm:inline text-muted-foreground">{org.name}</span>}
               <LanguageToggle />
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/settings"><Settings className="h-4 w-4 mx-1.5" /> {t("הגדרות", "Settings")}</Link>
+                <Link to="/settings">
+                  <Settings className="h-4 w-4 mx-1.5" /> {t("הגדרות", "Settings")}
+                </Link>
               </Button>
-              <Button variant="ghost" size="sm" onClick={async () => { await signOut(); nav({ to: "/" }); }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async () => {
+                  await signOut();
+                  nav({ to: "/" });
+                }}
+              >
                 <LogOut className="h-4 w-4 mx-1.5" /> {t("התנתקות", "Sign out")}
               </Button>
             </div>

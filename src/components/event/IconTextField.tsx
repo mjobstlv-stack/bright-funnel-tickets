@@ -46,7 +46,11 @@ export function IconTextField({
     requestAnimationFrame(() => {
       const caret = (before ? before.length + 1 : 0) + token.length;
       el?.focus();
-      try { el?.setSelectionRange(caret, caret); } catch { /* noop */ }
+      try {
+        el?.setSelectionRange(caret, caret);
+      } catch {
+        /* noop */
+      }
     });
   }
 
@@ -55,7 +59,9 @@ export function IconTextField({
       <div className="flex items-start gap-2">
         {multiline ? (
           <textarea
-            ref={(el) => { ref.current = el; }}
+            ref={(el) => {
+              ref.current = el;
+            }}
             rows={rows}
             value={value}
             maxLength={maxLength}
@@ -65,7 +71,9 @@ export function IconTextField({
           />
         ) : (
           <Input
-            ref={(el) => { ref.current = el; }}
+            ref={(el) => {
+              ref.current = el;
+            }}
             value={value}
             maxLength={maxLength}
             placeholder={placeholder}

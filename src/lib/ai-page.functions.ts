@@ -51,16 +51,21 @@ export const generateEventPage = createServerFn({ method: "POST" })
     const language = data.language === "he" ? "Hebrew" : "English";
     const category = data.eventCategory ?? "concert";
     const categoryGuide: Record<string, string> = {
-      concert: "A concert / party / DJ set. Energetic, bold, sensory. Prefer template 'poster' or 'immersive'. Dark moody backgrounds work well.",
-      conference: "A professional conference / webinar / lecture. Clean, credible, informative. Prefer template 'split' or 'minimal'. Light neutral backgrounds.",
-      festival: "A festival with multiple acts / experiences. Rich, layered, cinematic. Prefer template 'immersive' or 'classic'. Warm cinematic tones.",
+      concert:
+        "A concert / party / DJ set. Energetic, bold, sensory. Prefer template 'poster' or 'immersive'. Dark moody backgrounds work well.",
+      conference:
+        "A professional conference / webinar / lecture. Clean, credible, informative. Prefer template 'split' or 'minimal'. Light neutral backgrounds.",
+      festival:
+        "A festival with multiple acts / experiences. Rich, layered, cinematic. Prefer template 'immersive' or 'classic'. Warm cinematic tones.",
     };
 
     const refs: string[] = [];
     if (data.websiteUrl) refs.push(`Website: ${data.websiteUrl}`);
     if (data.instagramUrl) refs.push(`Instagram: ${data.instagramUrl}`);
     if (data.facebookUrl) refs.push(`Facebook: ${data.facebookUrl}`);
-    const refBlock = refs.length ? `\n\nBrand references (for tone/voice inspiration only):\n${refs.join("\n")}` : "";
+    const refBlock = refs.length
+      ? `\n\nBrand references (for tone/voice inspiration only):\n${refs.join("\n")}`
+      : "";
 
     const system = `You are an expert event marketer generating a full landing page in ${language}.
 Category: ${category}. ${categoryGuide[category]}
@@ -84,26 +89,38 @@ Return ONLY valid JSON (no markdown, no commentary) matching this exact shape:
 Valid lucide icon names include: Music, Mic, Star, Heart, Zap, Sparkles, Coffee, Utensils, Wine, Ticket, Users, Calendar, MapPin, Clock, Gift, Shield, Award, Trophy, Camera, Video, Headphones, PartyPopper, Cake, Flame, Sun, Moon, TreePine, Wifi, Car, Bus, Train, Accessibility, Baby, Dog.${refBlock}`;
 
     // Build multimodal user content
-    const userContent: Array<Record<string, unknown>> = [
-      { type: "text", text: data.prompt },
-    ];
+    const userContent: Array<Record<string, unknown>> = [{ type: "text", text: data.prompt }];
     const isSvg = (u: string) => /\.svg(\?|$)/i.test(u);
     if (data.logoUrl && !isSvg(data.logoUrl)) {
       userContent.push({ type: "image_url", image_url: { url: data.logoUrl } });
-      userContent.push({ type: "text", text: "^ This is the brand logo — extract colors from it." });
+      userContent.push({
+        type: "text",
+        text: "^ This is the brand logo — extract colors from it.",
+      });
     }
     if (data.brandBookUrl) {
       const mime = (data.brandBookMime || "").toLowerCase();
       if (mime.startsWith("image/") && mime !== "image/svg+xml" && !isSvg(data.brandBookUrl)) {
         userContent.push({ type: "image_url", image_url: { url: data.brandBookUrl } });
-        userContent.push({ type: "text", text: "^ This is the brand book — follow its palette/tone." });
+        userContent.push({
+          type: "text",
+          text: "^ This is the brand book — follow its palette/tone.",
+        });
       } else if (mime === "application/pdf" || /\.pdf(\?|$)/i.test(data.brandBookUrl)) {
         try {
           // SSRF guard: only allow fetching from our own Supabase storage host.
           const supaHost = new URL(process.env.SUPABASE_URL || "https://invalid.invalid").host;
           let parsed: URL;
-          try { parsed = new URL(data.brandBookUrl); } catch { throw new Error("Invalid brandBookUrl");}
-          if (parsed.protocol !== "https:" || parsed.host !== supaHost || !parsed.pathname.startsWith("/storage/")) {
+          try {
+            parsed = new URL(data.brandBookUrl);
+          } catch {
+            throw new Error("Invalid brandBookUrl");
+          }
+          if (
+            parsed.protocol !== "https:" ||
+            parsed.host !== supaHost ||
+            !parsed.pathname.startsWith("/storage/")
+          ) {
             throw new Error("brandBookUrl must be a Supabase storage URL");
           }
           const pdfRes = await fetch(parsed.toString());
@@ -115,9 +132,15 @@ Valid lucide icon names include: Music, Mic, Star, Heart, Zap, Sparkles, Coffee,
               const b64 = btoa(bin);
               userContent.push({
                 type: "file",
-                file: { filename: "brand-book.pdf", file_data: `data:${mime || "application/pdf"};base64,${b64}` },
+                file: {
+                  filename: "brand-book.pdf",
+                  file_data: `data:${mime || "application/pdf"};base64,${b64}`,
+                },
               });
-              userContent.push({ type: "text", text: "^ Brand book PDF — follow its palette/tone." });
+              userContent.push({
+                type: "text",
+                text: "^ Brand book PDF — follow its palette/tone.",
+              });
             }
           }
         } catch {
@@ -142,7 +165,8 @@ Valid lucide icon names include: Music, Mic, Star, Heart, Zap, Sparkles, Coffee,
       }),
     });
     if (res.status === 429) throw new Error("Rate limited — try again in a moment");
-    if (res.status === 402) throw new Error("AI credits exhausted — add credits in workspace settings");
+    if (res.status === 402)
+      throw new Error("AI credits exhausted — add credits in workspace settings");
     if (!res.ok) throw new Error(`AI error ${res.status}`);
     const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const content = json.choices?.[0]?.message?.content ?? "";
@@ -154,8 +178,9 @@ Valid lucide icon names include: Music, Mic, Star, Heart, Zap, Sparkles, Coffee,
     }
     const allowed = ["classic", "poster", "split", "minimal", "immersive"] as const;
     const template = allowed.includes(parsed.template) ? parsed.template : "classic";
-    const hex = (v: unknown) => (typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v : undefined);
-    const safeArr = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
+    const hex = (v: unknown) =>
+      typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v : undefined;
+    const safeArr = <T>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
     return {
       name: String(parsed.name ?? "").slice(0, 120),
       tagline: String(parsed.tagline ?? "").slice(0, 200),
@@ -163,10 +188,14 @@ Valid lucide icon names include: Music, Mic, Star, Heart, Zap, Sparkles, Coffee,
       template,
       bg_color: hex(parsed.bg_color),
       text_color: hex(parsed.text_color),
-      highlights: safeArr<{ icon?: string; title: string; description?: string }>(parsed.highlights).slice(0, 6),
+      highlights: safeArr<{ icon?: string; title: string; description?: string }>(
+        parsed.highlights,
+      ).slice(0, 6),
       includes: safeArr<{ icon?: string; text: string }>(parsed.includes).slice(0, 8),
       faq: safeArr<{ question: string; answer: string }>(parsed.faq).slice(0, 8),
       rules: safeArr<string>(parsed.rules).slice(0, 8),
-      schedule: safeArr<{ time?: string; title: string; description?: string }>(parsed.schedule).slice(0, 10),
+      schedule: safeArr<{ time?: string; title: string; description?: string }>(
+        parsed.schedule,
+      ).slice(0, 10),
     };
   });

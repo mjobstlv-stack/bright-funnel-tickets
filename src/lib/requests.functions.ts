@@ -34,15 +34,24 @@ function classifyHttp(status: number): ScrapeFailure {
 
 function failureLabel(f: ScrapeFailure): string {
   switch (f) {
-    case "config_missing": return "Firecrawl not configured";
-    case "timeout": return "Scrape timed out";
-    case "rate_limited": return "Rate limited by Firecrawl";
-    case "blocked": return "Profile blocked scraping (login wall / bot check)";
-    case "private": return "Profile is private";
-    case "not_found": return "Profile URL not found";
-    case "network_error": return "Network error contacting Firecrawl";
-    case "empty_screenshot": return "Firecrawl returned no screenshot";
-    case "http_error": return "Firecrawl HTTP error";
+    case "config_missing":
+      return "Firecrawl not configured";
+    case "timeout":
+      return "Scrape timed out";
+    case "rate_limited":
+      return "Rate limited by Firecrawl";
+    case "blocked":
+      return "Profile blocked scraping (login wall / bot check)";
+    case "private":
+      return "Profile is private";
+    case "not_found":
+      return "Profile URL not found";
+    case "network_error":
+      return "Network error contacting Firecrawl";
+    case "empty_screenshot":
+      return "Firecrawl returned no screenshot";
+    case "http_error":
+      return "Firecrawl HTTP error";
   }
 }
 
@@ -51,10 +60,19 @@ function failureLabel(f: ScrapeFailure): string {
 // failure: <reason> } when the profile is private, blocked, timed out, or
 // Firecrawl is unavailable — caller treats a failed image as an unsafe signal
 // and flags the decision as "maybe" for manual review.
-async function scrapeProfile(url: string, source: "instagram" | "facebook"): Promise<ScrapedProfile> {
+async function scrapeProfile(
+  url: string,
+  source: "instagram" | "facebook",
+): Promise<ScrapedProfile> {
   const key = process.env.FIRECRAWL_API_KEY;
   if (!key) {
-    return { url, source, screenshot: null, failure: "config_missing", error: failureLabel("config_missing") };
+    return {
+      url,
+      source,
+      screenshot: null,
+      failure: "config_missing",
+      error: failureLabel("config_missing"),
+    };
   }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), SCRAPE_TIMEOUT_MS);
@@ -74,22 +92,55 @@ async function scrapeProfile(url: string, source: "instagram" | "facebook"): Pro
     if (!res.ok) {
       const failure = classifyHttp(res.status);
       let detail = "";
-      try { detail = (await res.text()).slice(0, 200); } catch { /* ignore */ }
-      if (/login|sign in|private|not.*public/i.test(detail)) {
-        return { url, source, screenshot: null, failure: "private", error: `${failureLabel("private")} (${res.status})` };
+      try {
+        detail = (await res.text()).slice(0, 200);
+      } catch {
+        /* ignore */
       }
-      return { url, source, screenshot: null, failure, error: `${failureLabel(failure)} (${res.status})` };
+      if (/login|sign in|private|not.*public/i.test(detail)) {
+        return {
+          url,
+          source,
+          screenshot: null,
+          failure: "private",
+          error: `${failureLabel("private")} (${res.status})`,
+        };
+      }
+      return {
+        url,
+        source,
+        screenshot: null,
+        failure,
+        error: `${failureLabel(failure)} (${res.status})`,
+      };
     }
     const j = (await res.json()) as { data?: { screenshot?: string }; screenshot?: string };
     const shot = j.data?.screenshot ?? j.screenshot ?? null;
     if (!shot) {
-      return { url, source, screenshot: null, failure: "empty_screenshot", error: failureLabel("empty_screenshot") };
+      return {
+        url,
+        source,
+        screenshot: null,
+        failure: "empty_screenshot",
+        error: failureLabel("empty_screenshot"),
+      };
     }
     return { url, source, screenshot: shot };
   } catch (err) {
-    const isAbort = err instanceof Error && (err.name === "AbortError" || /abort/i.test(err.message));
+    const isAbort =
+      err instanceof Error && (err.name === "AbortError" || /abort/i.test(err.message));
     const failure: ScrapeFailure = isAbort ? "timeout" : "network_error";
-    return { url, source, screenshot: null, failure, error: isAbort ? failureLabel("timeout") : (err instanceof Error ? err.message : failureLabel("network_error")) };
+    return {
+      url,
+      source,
+      screenshot: null,
+      failure,
+      error: isAbort
+        ? failureLabel("timeout")
+        : err instanceof Error
+          ? err.message
+          : failureLabel("network_error"),
+    };
   } finally {
     clearTimeout(timer);
   }
@@ -102,7 +153,10 @@ function unsafeFromFailedScrapes(images: ScrapedProfile[]): AiDecision | null {
   const anySuccess = images.some((i) => i.screenshot);
   if (anySuccess) return null;
   const names: Record<string, string> = { instagram: "אינסטגרם", facebook: "פייסבוק" };
-  const parts = images.map((i) => `${names[i.source] ?? i.source}: ${i.error ?? failureLabel(i.failure ?? "network_error")}`);
+  const parts = images.map(
+    (i) =>
+      `${names[i.source] ?? i.source}: ${i.error ?? failureLabel(i.failure ?? "network_error")}`,
+  );
   return {
     decision: "maybe",
     score: 0,
@@ -123,21 +177,41 @@ function isStoredShot(v: string | null | undefined): v is string {
   return isProbablyUrl(v) && v.includes("/storage/v1/object/sign/");
 }
 
-async function loadStoredShot(url: string, source: "instagram" | "facebook"): Promise<ScrapedProfile> {
+async function loadStoredShot(
+  url: string,
+  source: "instagram" | "facebook",
+): Promise<ScrapedProfile> {
   try {
     const res = await fetch(url);
-    if (!res.ok) return { url, source, screenshot: null, failure: "network_error", error: `Stored screenshot unavailable (${res.status})` };
+    if (!res.ok)
+      return {
+        url,
+        source,
+        screenshot: null,
+        failure: "network_error",
+        error: `Stored screenshot unavailable (${res.status})`,
+      };
     const buf = new Uint8Array(await res.arrayBuffer());
     let bin = "";
     for (const b of buf) bin += String.fromCharCode(b);
     const type = res.headers.get("content-type") ?? "image/jpeg";
     return { url, source, screenshot: `data:${type};base64,${btoa(bin)}` };
   } catch (err) {
-    return { url, source, screenshot: null, failure: "network_error", error: err instanceof Error ? err.message : "fetch failed" };
+    return {
+      url,
+      source,
+      screenshot: null,
+      failure: "network_error",
+      error: err instanceof Error ? err.message : "fetch failed",
+    };
   }
 }
 
-type AiDecision = { decision: "approved" | "rejected" | "maybe"; score: number | null; reasoning: string };
+type AiDecision = {
+  decision: "approved" | "rejected" | "maybe";
+  score: number | null;
+  reasoning: string;
+};
 
 async function callVisionDoorman(args: {
   apiKey: string;
@@ -214,8 +288,11 @@ Screenshots attached below (in order): ${args.images.map((i) => `${i.source}${i.
       signal: aiController.signal,
     });
   } catch (err) {
-    const isAbort = err instanceof Error && (err.name === "AbortError" || /abort/i.test(err.message));
-    throw new Error(isAbort ? "AI request timed out" : (err instanceof Error ? err.message : "AI request failed"));
+    const isAbort =
+      err instanceof Error && (err.name === "AbortError" || /abort/i.test(err.message));
+    throw new Error(
+      isAbort ? "AI request timed out" : err instanceof Error ? err.message : "AI request failed",
+    );
   } finally {
     clearTimeout(aiTimer);
   }
@@ -226,8 +303,11 @@ Screenshots attached below (in order): ${args.images.map((i) => `${i.source}${i.
   const raw = json.choices?.[0]?.message?.content ?? "{}";
   const parsed = JSON.parse(raw) as { decision?: string; score?: number; reasoning?: string };
   const allowed = ["approved", "rejected", "maybe"] as const;
-  const decision = (allowed as readonly string[]).includes(parsed.decision ?? "") ? (parsed.decision as typeof allowed[number]) : "maybe";
-  const score = typeof parsed.score === "number" ? Math.max(0, Math.min(100, Math.round(parsed.score))) : null;
+  const decision = (allowed as readonly string[]).includes(parsed.decision ?? "")
+    ? (parsed.decision as (typeof allowed)[number])
+    : "maybe";
+  const score =
+    typeof parsed.score === "number" ? Math.max(0, Math.min(100, Math.round(parsed.score))) : null;
   const reasoning = String(parsed.reasoning ?? "").slice(0, 1500);
   return { decision, score, reasoning };
 }
@@ -247,7 +327,14 @@ const SubmitInput = z.object({
 // persist the images in storage with the service-role client and keep a long
 // signed URL on the request row for the reviewer + the AI doorman.
 async function storeShot(
-  admin: { storage: { from: (b: string) => { upload: (p: string, f: Blob, o?: unknown) => Promise<{ error: unknown }>; createSignedUrl: (p: string, s: number) => Promise<{ data: { signedUrl: string } | null }> } } },
+  admin: {
+    storage: {
+      from: (b: string) => {
+        upload: (p: string, f: Blob, o?: unknown) => Promise<{ error: unknown }>;
+        createSignedUrl: (p: string, s: number) => Promise<{ data: { signedUrl: string } | null }>;
+      };
+    };
+  },
   dataUrl: string,
   path: string,
 ): Promise<string | null> {
@@ -255,9 +342,13 @@ async function storeShot(
   if (!m) return null;
   const bytes = Uint8Array.from(atob(m[2]), (c) => c.charCodeAt(0));
   const blob = new Blob([bytes], { type: m[1] });
-  const { error } = await admin.storage.from("event-media").upload(path, blob, { upsert: true, contentType: m[1] });
+  const { error } = await admin.storage
+    .from("event-media")
+    .upload(path, blob, { upsert: true, contentType: m[1] });
   if (error) return null;
-  const { data } = await admin.storage.from("event-media").createSignedUrl(path, 60 * 60 * 24 * 365);
+  const { data } = await admin.storage
+    .from("event-media")
+    .createSignedUrl(path, 60 * 60 * 24 * 365);
   return data?.signedUrl ?? null;
 }
 
@@ -275,9 +366,12 @@ export const submitTicketRequest = createServerFn({ method: "POST" })
     if (!ev) throw new Error("Event not found");
     if (ev.status !== "published") throw new Error("Event is not published");
     if (!ev.requires_approval) throw new Error("This event does not require approval");
-    if (ev.require_instagram && !data.instagramShot) throw new Error("Instagram profile screenshot is required");
-    if (ev.require_facebook && !data.facebookShot) throw new Error("Facebook profile screenshot is required");
-    if (!data.instagramShot && !data.facebookShot) throw new Error("At least one profile screenshot is required");
+    if (ev.require_instagram && !data.instagramShot)
+      throw new Error("Instagram profile screenshot is required");
+    if (ev.require_facebook && !data.facebookShot)
+      throw new Error("Facebook profile screenshot is required");
+    if (!data.instagramShot && !data.facebookShot)
+      throw new Error("At least one profile screenshot is required");
 
     const { data: rec, error } = await supabaseAdmin
       .from("ticket_requests")
@@ -296,16 +390,41 @@ export const submitTicketRequest = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    const igUrl = data.instagramShot ? await storeShot(supabaseAdmin as never, data.instagramShot, `requests/${rec.id}/instagram.jpg`) : null;
-    const fbUrl = data.facebookShot ? await storeShot(supabaseAdmin as never, data.facebookShot, `requests/${rec.id}/facebook.jpg`) : null;
+    const igUrl = data.instagramShot
+      ? await storeShot(
+          supabaseAdmin as never,
+          data.instagramShot,
+          `requests/${rec.id}/instagram.jpg`,
+        )
+      : null;
+    const fbUrl = data.facebookShot
+      ? await storeShot(
+          supabaseAdmin as never,
+          data.facebookShot,
+          `requests/${rec.id}/facebook.jpg`,
+        )
+      : null;
     if (igUrl || fbUrl) {
-      await supabaseAdmin.from("ticket_requests").update({ instagram_url: igUrl, facebook_url: fbUrl }).eq("id", rec.id);
+      await supabaseAdmin
+        .from("ticket_requests")
+        .update({ instagram_url: igUrl, facebook_url: fbUrl })
+        .eq("id", rec.id);
     }
 
     // Fire and forget AI screening — do not block the submit
     const uploaded: ScrapedProfile[] = [];
-    if (data.instagramShot) uploaded.push({ url: igUrl ?? "(uploaded)", source: "instagram", screenshot: data.instagramShot });
-    if (data.facebookShot) uploaded.push({ url: fbUrl ?? "(uploaded)", source: "facebook", screenshot: data.facebookShot });
+    if (data.instagramShot)
+      uploaded.push({
+        url: igUrl ?? "(uploaded)",
+        source: "instagram",
+        screenshot: data.instagramShot,
+      });
+    if (data.facebookShot)
+      uploaded.push({
+        url: fbUrl ?? "(uploaded)",
+        source: "facebook",
+        screenshot: data.facebookShot,
+      });
     runScreening(rec.id, uploaded).catch(() => {});
     return { id: rec.id };
   });
@@ -316,46 +435,55 @@ export const submitTicketRequest = createServerFn({ method: "POST" })
 // (submitTicketRequest validates the event; rescreenTicketRequest requires
 // org owner auth via RLS).
 async function runScreening(requestId: string, uploaded?: ScrapedProfile[]): Promise<void> {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: rec, error } = await supabaseAdmin
+  const { data: rec, error } = await supabaseAdmin
+    .from("ticket_requests")
+    .select("id, event_id, buyer_name, buyer_email, instagram_url, facebook_url, status")
+    .eq("id", requestId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!rec) throw new Error("Request not found");
+  if (rec.status !== "pending" && rec.status !== "ai_reviewing") return;
+
+  const { data: ev } = await supabaseAdmin
+    .from("events")
+    .select("name, approval_criteria, visual_criteria")
+    .eq("id", rec.event_id)
+    .maybeSingle();
+
+  await supabaseAdmin.from("ticket_requests").update({ status: "ai_reviewing" }).eq("id", rec.id);
+
+  const key = process.env.LOVABLE_API_KEY;
+  if (!key) {
+    await supabaseAdmin
       .from("ticket_requests")
-      .select("id, event_id, buyer_name, buyer_email, instagram_url, facebook_url, status")
-      .eq("id", requestId)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!rec) throw new Error("Request not found");
-    if (rec.status !== "pending" && rec.status !== "ai_reviewing") return;
-
-    const { data: ev } = await supabaseAdmin
-      .from("events")
-      .select("name, approval_criteria, visual_criteria")
-      .eq("id", rec.event_id)
-      .maybeSingle();
-
-    await supabaseAdmin.from("ticket_requests").update({ status: "ai_reviewing" }).eq("id", rec.id);
-
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) {
-      await supabaseAdmin.from("ticket_requests").update({
+      .update({
         status: "maybe",
         ai_decision: "maybe",
         ai_reasoning: "AI not configured — manual review required.",
-      }).eq("id", rec.id);
-      return;
+      })
+      .eq("id", rec.id);
+    return;
+  }
+
+  try {
+    let images: ScrapedProfile[] = uploaded ?? [];
+    if (images.length === 0) {
+      if (isStoredShot(rec.instagram_url))
+        images = [...images, await loadStoredShot(rec.instagram_url, "instagram")];
+      else if (isProbablyUrl(rec.instagram_url))
+        images = [...images, await scrapeProfile(rec.instagram_url, "instagram")];
+      if (isStoredShot(rec.facebook_url))
+        images = [...images, await loadStoredShot(rec.facebook_url, "facebook")];
+      else if (isProbablyUrl(rec.facebook_url))
+        images = [...images, await scrapeProfile(rec.facebook_url, "facebook")];
     }
 
-    try {
-      let images: ScrapedProfile[] = uploaded ?? [];
-      if (images.length === 0) {
-        if (isStoredShot(rec.instagram_url)) images = [...images, await loadStoredShot(rec.instagram_url, "instagram")];
-        else if (isProbablyUrl(rec.instagram_url)) images = [...images, await scrapeProfile(rec.instagram_url, "instagram")];
-        if (isStoredShot(rec.facebook_url)) images = [...images, await loadStoredShot(rec.facebook_url, "facebook")];
-        else if (isProbablyUrl(rec.facebook_url)) images = [...images, await scrapeProfile(rec.facebook_url, "facebook")];
-      }
-
-      const unsafe = unsafeFromFailedScrapes(images);
-      const result = unsafe ?? await callVisionDoorman({
+    const unsafe = unsafeFromFailedScrapes(images);
+    const result =
+      unsafe ??
+      (await callVisionDoorman({
         apiKey: key,
         eventName: ev?.name ?? "Unknown",
         criteria: (ev?.approval_criteria ?? "").trim(),
@@ -365,23 +493,29 @@ async function runScreening(requestId: string, uploaded?: ScrapedProfile[]): Pro
         instagramUrl: rec.instagram_url,
         facebookUrl: rec.facebook_url,
         images,
-      });
+      }));
 
-      await supabaseAdmin.from("ticket_requests").update({
+    await supabaseAdmin
+      .from("ticket_requests")
+      .update({
         status: result.decision,
         ai_decision: result.decision,
         ai_score: result.score,
         ai_reasoning: result.reasoning,
-      }).eq("id", rec.id);
-      return;
-    } catch (err) {
-      await supabaseAdmin.from("ticket_requests").update({
+      })
+      .eq("id", rec.id);
+    return;
+  } catch (err) {
+    await supabaseAdmin
+      .from("ticket_requests")
+      .update({
         status: "maybe",
         ai_decision: "maybe",
         ai_reasoning: `AI screening failed: ${err instanceof Error ? err.message : "unknown"}. Please review manually.`,
-      }).eq("id", rec.id);
-      return;
-    }
+      })
+      .eq("id", rec.id);
+    return;
+  }
 }
 
 const DecideInput = z.object({
@@ -445,7 +579,10 @@ export const rescreenTicketRequest = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error || !rec) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("ticket_requests").update({ status: "pending", ai_decision: null, ai_score: null, ai_reasoning: null }).eq("id", data.requestId);
+    await supabaseAdmin
+      .from("ticket_requests")
+      .update({ status: "pending", ai_decision: null, ai_score: null, ai_reasoning: null })
+      .eq("id", data.requestId);
     await runScreening(data.requestId);
     return { ok: true };
   });
@@ -474,8 +611,10 @@ export const testApprovalCriteria = createServerFn({ method: "POST" })
     if (!key) throw new Error("AI not configured");
 
     const images: ScrapedProfile[] = [];
-    if (data.instagramScreenshot) images.push({ url: "(uploaded)", source: "instagram", screenshot: data.instagramScreenshot });
-    if (data.facebookScreenshot) images.push({ url: "(uploaded)", source: "facebook", screenshot: data.facebookScreenshot });
+    if (data.instagramScreenshot)
+      images.push({ url: "(uploaded)", source: "instagram", screenshot: data.instagramScreenshot });
+    if (data.facebookScreenshot)
+      images.push({ url: "(uploaded)", source: "facebook", screenshot: data.facebookScreenshot });
 
     const result = await callVisionDoorman({
       apiKey: key,
@@ -504,12 +643,20 @@ export const getRequestByToken = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rec, error } = await supabaseAdmin
       .from("ticket_requests")
-      .select("id, event_id, ticket_type_id, buyer_name, buyer_email, buyer_phone, quantity, status, access_token, order_id")
+      .select(
+        "id, event_id, ticket_type_id, buyer_name, buyer_email, buyer_phone, quantity, status, access_token, order_id",
+      )
       .eq("id", data.requestId)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!rec || rec.access_token !== data.token) return null;
-    if (rec.status !== "approved") return { request: { ...rec, access_token: undefined }, event: null, ticket_type: null, blocked: true as const };
+    if (rec.status !== "approved")
+      return {
+        request: { ...rec, access_token: undefined },
+        event: null,
+        ticket_type: null,
+        blocked: true as const,
+      };
 
     const { data: ev } = await supabaseAdmin
       .from("events")
@@ -568,7 +715,9 @@ export const listReviewQueue = createServerFn({ method: "POST" })
 
     let q = supabaseAdmin
       .from("ticket_requests")
-      .select("id, event_id, buyer_name, buyer_email, buyer_phone, instagram_url, facebook_url, status, ai_score, ai_reasoning, created_at")
+      .select(
+        "id, event_id, buyer_name, buyer_email, buyer_phone, instagram_url, facebook_url, status, ai_score, ai_reasoning, created_at",
+      )
       .in("event_id", eventIds)
       .order("created_at", { ascending: false })
       .limit(500);

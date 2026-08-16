@@ -31,12 +31,12 @@ one; it's a one-time extraction, not a fork/subtree.
 
 ## Scope decisions (confirmed with user)
 
-| Feature | Decision |
-|---|---|
-| Event "Ops" tab (inventory / staff availability / time clock / venue layout) | **Removed entirely** |
-| Public sale mode: "booking" (table reservation as alternative to tickets) | **Removed entirely** — tickets-only |
-| Event "Budget" tab (self-contained per-event expense tracker) | **Kept** |
-| Platform "System admin" console (cross-org admin panel) | **Kept** |
+| Feature                                                                      | Decision                            |
+| ---------------------------------------------------------------------------- | ----------------------------------- |
+| Event "Ops" tab (inventory / staff availability / time clock / venue layout) | **Removed entirely**                |
+| Public sale mode: "booking" (table reservation as alternative to tickets)    | **Removed entirely** — tickets-only |
+| Event "Budget" tab (self-contained per-event expense tracker)                | **Kept**                            |
+| Platform "System admin" console (cross-org admin panel)                      | **Kept**                            |
 
 ## File scope
 
@@ -93,6 +93,7 @@ module, which is dropped — `meet.functions.ts` does not depend on it),
 ticketing code imports it directly.
 
 **Code edits required (not just copy):**
+
 1. `events.$id.tsx` — delete the Ops tab import + JSX block (Inventory/
    Availability/TimeClock/VenueLayout). Keep Budget tab as-is.
 2. `e.$slug.index.tsx` — delete the `sale_mode === "booking"` branch and the

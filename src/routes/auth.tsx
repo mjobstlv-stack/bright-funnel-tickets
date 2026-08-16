@@ -9,7 +9,10 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { LanguageToggle, useLang } from "@/lib/i18n";
 
-const searchSchema = z.object({ redirect: z.string().optional(), confirmed: z.string().optional() });
+const searchSchema = z.object({
+  redirect: z.string().optional(),
+  confirmed: z.string().optional(),
+});
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
@@ -38,7 +41,8 @@ function AuthPage() {
   }, [user, loading, nav, redirect]);
 
   useEffect(() => {
-    if (confirmed) toast.success(t("האימייל אומת. אפשר להתחבר.", "E-mail verified. You can sign in."));
+    if (confirmed)
+      toast.success(t("האימייל אומת. אפשר להתחבר.", "E-mail verified. You can sign in."));
   }, [confirmed, t]);
 
   useEffect(() => {
@@ -50,14 +54,27 @@ function AuthPage() {
   function authErrorText(err: unknown) {
     const msg = err instanceof Error ? err.message : "";
     const low = msg.toLowerCase();
-    if (low.includes("only request this after") || low.includes("rate limit") || low.includes("too many")) {
-      return t("נשלחו יותר מדי מיילים ברגע זה. נסי שוב בעוד דקה.", "Too many e-mails just now. Try again in a minute.");
+    if (
+      low.includes("only request this after") ||
+      low.includes("rate limit") ||
+      low.includes("too many")
+    ) {
+      return t(
+        "נשלחו יותר מדי מיילים ברגע זה. נסי שוב בעוד דקה.",
+        "Too many e-mails just now. Try again in a minute.",
+      );
     }
     if (low.includes("weak") || low.includes("known to be weak")) {
-      return t("הסיסמה חלשה מדי. בחרי סיסמה ארוכה וייחודית יותר.", "That password is too weak. Choose a longer, unique one.");
+      return t(
+        "הסיסמה חלשה מדי. בחרי סיסמה ארוכה וייחודית יותר.",
+        "That password is too weak. Choose a longer, unique one.",
+      );
     }
     if (low.includes("already been registered") || low.includes("already registered")) {
-      return t("הכתובת כבר רשומה. התחברי או אפסי סיסמה.", "That address is already registered. Sign in or reset your password.");
+      return t(
+        "הכתובת כבר רשומה. התחברי או אפסי סיסמה.",
+        "That address is already registered. Sign in or reset your password.",
+      );
     }
     return msg || t("ההרשמה נכשלה", "Sign up failed");
   }
@@ -96,7 +113,12 @@ function AuthPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         if (/invalid/i.test(error.message)) {
-          toast.error(t("סיסמה שגויה, או שהחשבון עדיין לא קיים.", "Wrong password, or account doesn't exist yet."));
+          toast.error(
+            t(
+              "סיסמה שגויה, או שהחשבון עדיין לא קיים.",
+              "Wrong password, or account doesn't exist yet.",
+            ),
+          );
         } else throw error;
       } else {
         toast.success(t("ברוכה השבה", "Welcome back"));
@@ -167,17 +189,25 @@ function AuthPage() {
               <ArrowLeft className="h-4 w-4" /> {t("דף הבית", "Home")}
             </Link>
           ) : (
-            <button onClick={back} className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
+            <button
+              onClick={back}
+              className="text-sm text-muted-foreground inline-flex items-center gap-1.5"
+            >
               <ArrowLeft className="h-4 w-4" /> {t("חזרה", "Back")}
             </button>
           )}
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Event OS</span>
+            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Event OS
+            </span>
             <LanguageToggle />
           </div>
         </div>
         <div className="h-1 bg-black/5">
-          <div className="h-full bg-foreground transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+          <div
+            className="h-full bg-foreground transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
 
@@ -187,11 +217,18 @@ function AuthPage() {
           {step === "email" && (
             <form onSubmit={submitEmail} className="space-y-8">
               <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{t("שלב 1 מתוך 2", "Step 1 of 2")}</div>
+                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  {t("שלב 1 מתוך 2", "Step 1 of 2")}
+                </div>
                 <h1 className="mt-3 text-4xl sm:text-5xl font-display tracking-tight leading-[1.05]">
                   {t("מה האימייל שלך?", "What's your email?")}
                 </h1>
-                <p className="mt-3 text-muted-foreground">{t("נחבר אותך או ניצור לך סביבת עבודה חדשה.", "We'll sign you in or create your workspace.")}</p>
+                <p className="mt-3 text-muted-foreground">
+                  {t(
+                    "נחבר אותך או ניצור לך סביבת עבודה חדשה.",
+                    "We'll sign you in or create your workspace.",
+                  )}
+                </p>
               </div>
               <Input
                 autoFocus
@@ -212,11 +249,18 @@ function AuthPage() {
           {step === "password" && (
             <form onSubmit={submitPassword} className="space-y-8">
               <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{t("שלב 2 מתוך 2", "Step 2 of 2")}</div>
+                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  {t("שלב 2 מתוך 2", "Step 2 of 2")}
+                </div>
                 <h1 className="mt-3 text-4xl sm:text-5xl font-display tracking-tight leading-[1.05]">
                   {t("הזיני את הסיסמה שלך", "Enter your password")}
                 </h1>
-                <p className="mt-3 text-muted-foreground truncate">{t("מתחברת כ", "Signing in as")} <span className="text-foreground" dir="ltr">{email}</span></p>
+                <p className="mt-3 text-muted-foreground truncate">
+                  {t("מתחברת כ", "Signing in as")}{" "}
+                  <span className="text-foreground" dir="ltr">
+                    {email}
+                  </span>
+                </p>
               </div>
               <Input
                 autoFocus
@@ -229,13 +273,27 @@ function AuthPage() {
                 className="h-14 text-lg rounded-2xl border-black/15 focus-visible:ring-2 focus-visible:ring-foreground"
               />
               <Button type="submit" disabled={busy} className="w-full h-14 rounded-full text-base">
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{t("התחברות", "Sign in")} <ArrowRight className="ms-2 h-4 w-4" /></>}
+                {busy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    {t("התחברות", "Sign in")} <ArrowRight className="ms-2 h-4 w-4" />
+                  </>
+                )}
               </Button>
               <div className="flex items-center justify-between text-sm">
-                <button type="button" onClick={() => setStep("forgot")} className="text-muted-foreground hover:text-foreground underline underline-offset-4">
+                <button
+                  type="button"
+                  onClick={() => setStep("forgot")}
+                  className="text-muted-foreground hover:text-foreground underline underline-offset-4"
+                >
                   {t("שכחת סיסמה?", "Forgot password?")}
                 </button>
-                <button type="button" onClick={() => setStep("signup")} className="text-foreground font-medium underline underline-offset-4">
+                <button
+                  type="button"
+                  onClick={() => setStep("signup")}
+                  className="text-foreground font-medium underline underline-offset-4"
+                >
                   {t("יצירת חשבון", "Create account")}
                 </button>
               </div>
@@ -245,11 +303,18 @@ function AuthPage() {
           {step === "signup" && (
             <form onSubmit={submitSignup} className="space-y-6">
               <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{t("יצירת חשבון", "Create account")}</div>
+                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  {t("יצירת חשבון", "Create account")}
+                </div>
                 <h1 className="mt-3 text-4xl sm:text-5xl font-display tracking-tight leading-[1.05]">
                   {t("כמה פרטים קטנים", "A couple of details")}
                 </h1>
-                <p className="mt-3 text-muted-foreground truncate">{t("עבור", "for")} <span className="text-foreground" dir="ltr">{email}</span></p>
+                <p className="mt-3 text-muted-foreground truncate">
+                  {t("עבור", "for")}{" "}
+                  <span className="text-foreground" dir="ltr">
+                    {email}
+                  </span>
+                </p>
               </div>
               <Input
                 autoFocus
@@ -269,23 +334,43 @@ function AuthPage() {
                 className="h-14 text-lg rounded-2xl border-black/15 focus-visible:ring-2 focus-visible:ring-foreground"
               />
               <Button type="submit" disabled={busy} className="w-full h-14 rounded-full text-base">
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{t("יצירת חשבון", "Create account")} <ArrowRight className="ms-2 h-4 w-4" /></>}
+                {busy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    {t("יצירת חשבון", "Create account")} <ArrowRight className="ms-2 h-4 w-4" />
+                  </>
+                )}
               </Button>
-              <p className="text-xs text-muted-foreground">{t("בהמשך את מסכימה לתנאי השימוש שלנו.", "By continuing you agree to our terms.")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("בהמשך את מסכימה לתנאי השימוש שלנו.", "By continuing you agree to our terms.")}
+              </p>
             </form>
           )}
 
           {step === "forgot" && (
             <form onSubmit={submitForgot} className="space-y-8">
               <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{t("איפוס סיסמה", "Password reset")}</div>
+                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  {t("איפוס סיסמה", "Password reset")}
+                </div>
                 <h1 className="mt-3 text-4xl sm:text-5xl font-display tracking-tight leading-[1.05]">
                   {t("שלחו לי קישור", "Send me a link")}
                 </h1>
-                <p className="mt-3 text-muted-foreground">{t("נשלח קישור מאובטח לאיפוס אל", "We'll email a secure reset link to")} <span className="text-foreground" dir="ltr">{email}</span>.</p>
+                <p className="mt-3 text-muted-foreground">
+                  {t("נשלח קישור מאובטח לאיפוס אל", "We'll email a secure reset link to")}{" "}
+                  <span className="text-foreground" dir="ltr">
+                    {email}
+                  </span>
+                  .
+                </p>
               </div>
               <Button type="submit" disabled={busy} className="w-full h-14 rounded-full text-base">
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : t("שליחת קישור לאיפוס", "Send reset link")}
+                {busy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  t("שליחת קישור לאיפוס", "Send reset link")
+                )}
               </Button>
             </form>
           )}
@@ -296,16 +381,23 @@ function AuthPage() {
                 <Check className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-4xl sm:text-5xl font-display tracking-tight leading-[1.05]">{t("בדקי את המייל שלך", "Check your inbox")}</h1>
+                <h1 className="text-4xl sm:text-5xl font-display tracking-tight leading-[1.05]">
+                  {t("בדקי את המייל שלך", "Check your inbox")}
+                </h1>
                 <p className="mt-3 text-muted-foreground">
                   {sentKind === "confirm"
                     ? t("שלחנו קישור לאישור החשבון אל", "We sent an account confirmation link to")
                     : t("שלחנו קישור לאיפוס אל", "We sent a reset link to")}{" "}
-                  <span className="text-foreground" dir="ltr">{email}</span>.
+                  <span className="text-foreground" dir="ltr">
+                    {email}
+                  </span>
+                  .
                 </p>
                 {sentKind === "confirm" && (
                   <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                    <p className="font-medium">{t("לא רואה את המייל? זה הגיוני.", "Don't see the e-mail? That's expected.")}</p>
+                    <p className="font-medium">
+                      {t("לא רואה את המייל? זה הגיוני.", "Don't see the e-mail? That's expected.")}
+                    </p>
                     <p className="mt-1">
                       {t(
                         "המייל נשלח מדומיין ברירת מחדל של Supabase, לכן יכול להיכנס לספאם או להיות מסומן כמסוכן. בדקי בתיקיית 'ספאם/דואר זבל' וב'קידומים'.",
@@ -333,12 +425,19 @@ function AuthPage() {
                     : t("שליחת המייל מחדש", "Resend e-mail")}
                 </Button>
               )}
-              <Button type="button" onClick={() => setStep("email")} variant="outline" className="w-full h-14 rounded-full text-base">
-                {t("שימוש באימייל אחר / יצירת חשבון אחר", "Use a different e-mail / create another account")}
+              <Button
+                type="button"
+                onClick={() => setStep("email")}
+                variant="outline"
+                className="w-full h-14 rounded-full text-base"
+              >
+                {t(
+                  "שימוש באימייל אחר / יצירת חשבון אחר",
+                  "Use a different e-mail / create another account",
+                )}
               </Button>
             </div>
           )}
-
         </div>
       </div>
     </div>

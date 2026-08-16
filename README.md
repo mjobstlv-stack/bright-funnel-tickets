@@ -29,6 +29,12 @@ data). Not yet split into an isolated database.
 - Checkout payment is currently a **hardcoded mock** (no real PayPlus call).
 - No email/SMS is actually sent for ticket delivery yet, despite UI copy
   implying it.
+- `npm audit` reports a **high-severity, no-fix-available** advisory in the
+  `xlsx` (SheetJS) package used by the schedule-import feature on the event
+  edit page (Prototype Pollution / ReDoS, GHSA-4r6h-8v6p-xvw6,
+  GHSA-5pgg-2g8v-p4x9). This is a known upstream issue — SheetJS stopped
+  publishing fixed versions to npm — carried over from the source app, not
+  introduced here.
 
 ## ⚠ Known security issue (pre-existing, carried over from the source app — not fixed during extraction)
 

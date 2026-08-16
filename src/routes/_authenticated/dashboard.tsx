@@ -5,8 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Calendar, Plus, Ticket, DollarSign, Users, TrendingUp, Wallet,
-  ShieldCheck, ArrowUpRight, Clock, Receipt,
+  Calendar,
+  Plus,
+  Ticket,
+  DollarSign,
+  Users,
+  TrendingUp,
+  Wallet,
+  ShieldCheck,
+  ArrowUpRight,
+  Clock,
+  Receipt,
 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 
@@ -44,7 +53,13 @@ function Dashboard() {
   const { user } = useAuth();
   const { t, lang } = useLang();
   const [events, setEvents] = useState<EventRow[]>([]);
-  const [stats, setStats] = useState({ revenue: 0, ticketsSold: 0, orders: 0, expenses: 0, pendingRequests: 0 });
+  const [stats, setStats] = useState({
+    revenue: 0,
+    ticketsSold: 0,
+    orders: 0,
+    expenses: 0,
+    pendingRequests: 0,
+  });
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [orgName, setOrgName] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -52,7 +67,12 @@ function Dashboard() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: org } = await supabase.from("organizations").select("id,name").order("created_at", { ascending: true }).limit(1).maybeSingle();
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("id,name")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
       if (!org) return setLoading(false);
       setOrgName(org.name);
       const { data: evs } = await supabase
@@ -66,18 +86,12 @@ function Dashboard() {
       if (ids.length) {
         const [{ data: ords }, tixRes, expRes, reqRes, recentRes] = await Promise.all([
           supabase
-          .from("orders")
-          .select("total,status,event_id")
-          .in("event_id", ids)
+            .from("orders")
+            .select("total,status,event_id")
+            .in("event_id", ids)
             .eq("status", "paid"),
-          supabase
-            .from("tickets")
-            .select("id", { count: "exact", head: true })
-            .in("event_id", ids),
-          supabase
-            .from("event_expenses")
-            .select("amount")
-            .in("event_id", ids),
+          supabase.from("tickets").select("id", { count: "exact", head: true }).in("event_id", ids),
+          supabase.from("event_expenses").select("amount").in("event_id", ids),
           supabase
             .from("ticket_requests")
             .select("id", { count: "exact", head: true })
@@ -114,7 +128,10 @@ function Dashboard() {
   const net = stats.revenue - stats.expenses;
 
   const today = new Date().toLocaleDateString(lang === "he" ? "he-IL" : "en-US", {
-    weekday: "short", day: "numeric", month: "long", year: "numeric",
+    weekday: "short",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 
   return (
@@ -123,7 +140,8 @@ function Dashboard() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-3xl sm:text-4xl font-display tracking-tight">
-            {t("ברוכה הבאה", "Welcome back")}{orgName ? ` · ${orgName}` : ""}
+            {t("ברוכה הבאה", "Welcome back")}
+            {orgName ? ` · ${orgName}` : ""}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             {t("מבט חי על הכנסות, כרטיסים ובקשות.", "Live view of revenue, tickets and requests.")}
@@ -131,48 +149,96 @@ function Dashboard() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-white border border-black/5 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />{today}
+            <Calendar className="h-4 w-4" />
+            {today}
           </span>
           {stats.pendingRequests > 0 && (
-            <Button asChild variant="outline" className="rounded-full h-10 px-4 border-black/10 bg-white">
+            <Button
+              asChild
+              variant="outline"
+              className="rounded-full h-10 px-4 border-black/10 bg-white"
+            >
               <Link to="/reviews">
                 <ShieldCheck className="h-4 w-4 mx-1.5" />
                 {t(`${stats.pendingRequests} בקשות`, `${stats.pendingRequests} requests`)}
               </Link>
             </Button>
           )}
-          <Button asChild className="rounded-full h-10 px-5 bg-emerald-600 hover:bg-emerald-700 text-white">
-            <Link to="/events/new"><Plus className="h-4 w-4 mx-1.5" /> {t("אירוע חדש", "New event")}</Link>
+          <Button
+            asChild
+            className="rounded-full h-10 px-5 bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
+            <Link to="/events/new">
+              <Plus className="h-4 w-4 mx-1.5" /> {t("אירוע חדש", "New event")}
+            </Link>
           </Button>
         </div>
       </div>
 
       {/* Top KPI row */}
       <div className="grid md:grid-cols-3 gap-4">
-        <Stat big icon={<DollarSign className="h-4 w-4" />} label={t("הכנסות (שולם)", "Revenue (paid)")} value={money(stats.revenue)} tone="emerald" />
-        <Stat icon={<Wallet className="h-4 w-4" />} label={t("הוצאות", "Expenses")} value={money(stats.expenses)} tone="amber" />
-        <Stat icon={<TrendingUp className="h-4 w-4" />} label={t("רווח נקי", "Net profit")} value={money(net)} tone={net >= 0 ? "emerald" : "rose"} />
+        <Stat
+          big
+          icon={<DollarSign className="h-4 w-4" />}
+          label={t("הכנסות (שולם)", "Revenue (paid)")}
+          value={money(stats.revenue)}
+          tone="emerald"
+        />
+        <Stat
+          icon={<Wallet className="h-4 w-4" />}
+          label={t("הוצאות", "Expenses")}
+          value={money(stats.expenses)}
+          tone="amber"
+        />
+        <Stat
+          icon={<TrendingUp className="h-4 w-4" />}
+          label={t("רווח נקי", "Net profit")}
+          value={money(net)}
+          tone={net >= 0 ? "emerald" : "rose"}
+        />
       </div>
 
       <div className="grid sm:grid-cols-3 gap-4">
-        <Stat icon={<Ticket className="h-4 w-4" />} label={t("כרטיסים שהונפקו", "Tickets issued")} value={stats.ticketsSold.toLocaleString()} tone="sky" />
-        <Stat icon={<Users className="h-4 w-4" />} label={t("הזמנות ששולמו", "Paid orders")} value={stats.orders.toLocaleString()} tone="violet" />
-        <Stat icon={<ShieldCheck className="h-4 w-4" />} label={t("בקשות ממתינות", "Pending requests")} value={stats.pendingRequests.toLocaleString()} tone="rose" />
+        <Stat
+          icon={<Ticket className="h-4 w-4" />}
+          label={t("כרטיסים שהונפקו", "Tickets issued")}
+          value={stats.ticketsSold.toLocaleString()}
+          tone="sky"
+        />
+        <Stat
+          icon={<Users className="h-4 w-4" />}
+          label={t("הזמנות ששולמו", "Paid orders")}
+          value={stats.orders.toLocaleString()}
+          tone="violet"
+        />
+        <Stat
+          icon={<ShieldCheck className="h-4 w-4" />}
+          label={t("בקשות ממתינות", "Pending requests")}
+          value={stats.pendingRequests.toLocaleString()}
+          tone="rose"
+        />
       </div>
 
       {/* Upcoming + Recent orders */}
       <div className="grid lg:grid-cols-3 gap-4">
         <section className="lg:col-span-2 rounded-2xl bg-white border border-black/5 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-4 w-4 text-emerald-600" />{t("אירועים קרובים", "Upcoming events")}</h2>
-            <Link to="/events" className="text-sm text-muted-foreground hover:text-foreground">{t("לכל האירועים →", "View all →")}</Link>
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Clock className="h-4 w-4 text-emerald-600" />
+              {t("אירועים קרובים", "Upcoming events")}
+            </h2>
+            <Link to="/events" className="text-sm text-muted-foreground hover:text-foreground">
+              {t("לכל האירועים →", "View all →")}
+            </Link>
           </div>
           {loading ? (
             <p className="text-sm text-muted-foreground">{t("טוען…", "Loading…")}</p>
           ) : upcoming.length === 0 ? (
             <Card className="p-8 text-center border-dashed border-black/10 bg-neutral-50 shadow-none">
               <Calendar className="h-7 w-7 mx-auto text-muted-foreground" />
-              <p className="mt-2 text-sm text-muted-foreground">{t("אין אירועים עתידיים", "No upcoming events")}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t("אין אירועים עתידיים", "No upcoming events")}
+              </p>
             </Card>
           ) : (
             <div className="space-y-2">
@@ -181,12 +247,29 @@ function Dashboard() {
                   <Card className="flex items-center gap-4 p-3 rounded-xl border-transparent bg-neutral-50 shadow-none hover:bg-neutral-100 transition-colors">
                     <div
                       className="h-16 w-24 rounded-lg shrink-0 bg-gradient-to-br from-pink-200 via-purple-100 to-sky-200"
-                      style={e.cover_url ? { backgroundImage: `url(${e.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+                      style={
+                        e.cover_url
+                          ? {
+                              backgroundImage: `url(${e.cover_url})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }
+                          : undefined
+                      }
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 text-xs">
-                        <span className={`px-2 py-0.5 rounded-full ${e.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{e.status}</span>
-                        <span className="text-muted-foreground">{new Date(e.start_at!).toLocaleDateString(lang === "he" ? "he-IL" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full ${e.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
+                        >
+                          {e.status}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {new Date(e.start_at!).toLocaleDateString(
+                            lang === "he" ? "he-IL" : "en-US",
+                            { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" },
+                          )}
+                        </span>
                       </div>
                       <h3 className="mt-1 font-medium truncate">{e.name}</h3>
                     </div>
@@ -200,22 +283,40 @@ function Dashboard() {
 
         <section className="rounded-2xl bg-white border border-black/5 p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold flex items-center gap-2"><Receipt className="h-4 w-4 text-emerald-600" />{t("הזמנות אחרונות", "Recent orders")}</h2>
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Receipt className="h-4 w-4 text-emerald-600" />
+              {t("הזמנות אחרונות", "Recent orders")}
+            </h2>
           </div>
           <div>
             {recentOrders.length === 0 ? (
-              <p className="p-6 text-center text-sm text-muted-foreground">{t("אין עדיין הזמנות", "No orders yet")}</p>
+              <p className="p-6 text-center text-sm text-muted-foreground">
+                {t("אין עדיין הזמנות", "No orders yet")}
+              </p>
             ) : (
               <ul className="divide-y divide-black/5">
                 {recentOrders.map((o) => (
                   <li key={o.id} className="flex items-center justify-between gap-3 py-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">{o.buyer_name || o.order_number || o.id.slice(0, 8)}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString(lang === "he" ? "he-IL" : "en-US", { day: "numeric", month: "short" })}</p>
+                      <p className="text-sm font-medium truncate">
+                        {o.buyer_name || o.order_number || o.id.slice(0, 8)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(o.created_at).toLocaleDateString(
+                          lang === "he" ? "he-IL" : "en-US",
+                          { day: "numeric", month: "short" },
+                        )}
+                      </p>
                     </div>
                     <div className="text-end shrink-0">
-                      <p className="text-sm font-semibold tabular-nums">{money(Number(o.total), o.currency)}</p>
-                      <span className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${o.status === "paid" ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-muted-foreground"}`}>{o.status}</span>
+                      <p className="text-sm font-semibold tabular-nums">
+                        {money(Number(o.total), o.currency)}
+                      </p>
+                      <span
+                        className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${o.status === "paid" ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-muted-foreground"}`}
+                      >
+                        {o.status}
+                      </span>
                     </div>
                   </li>
                 ))}
@@ -228,7 +329,9 @@ function Dashboard() {
       <section className="rounded-2xl bg-white border border-black/5 p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">{t("האירועים שלך", "Your events")}</h2>
-          <Link to="/events" className="text-sm text-muted-foreground hover:text-foreground">{t("לכל האירועים →", "View all →")}</Link>
+          <Link to="/events" className="text-sm text-muted-foreground hover:text-foreground">
+            {t("לכל האירועים →", "View all →")}
+          </Link>
         </div>
         {loading ? (
           <p className="text-sm text-muted-foreground">{t("טוען…", "Loading…")}</p>
@@ -236,8 +339,16 @@ function Dashboard() {
           <Card className="p-10 text-center border-dashed border-black/10 bg-neutral-50 shadow-none">
             <Calendar className="h-8 w-8 mx-auto text-muted-foreground" />
             <p className="mt-3 font-medium">{t("אין עדיין אירועים", "No events yet")}</p>
-            <p className="text-sm text-muted-foreground mt-1">{t("צרי את האירוע הראשון שלך והתחילי למכור כרטיסים.", "Create your first event to start selling tickets.")}</p>
-            <Button asChild className="mt-5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white">
+            <p className="text-sm text-muted-foreground mt-1">
+              {t(
+                "צרי את האירוע הראשון שלך והתחילי למכור כרטיסים.",
+                "Create your first event to start selling tickets.",
+              )}
+            </p>
+            <Button
+              asChild
+              className="mt-5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
               <Link to="/events/new">{t("צרי אירוע", "Create event")}</Link>
             </Button>
           </Card>
@@ -248,12 +359,28 @@ function Dashboard() {
                 <Card className="overflow-hidden rounded-xl border-transparent bg-neutral-50 shadow-none hover:bg-neutral-100 transition-colors">
                   <div
                     className="aspect-[16/9] bg-gradient-to-br from-pink-200 via-purple-100 to-sky-200"
-                    style={e.cover_url ? { backgroundImage: `url(${e.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+                    style={
+                      e.cover_url
+                        ? {
+                            backgroundImage: `url(${e.cover_url})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }
+                        : undefined
+                    }
                   />
                   <div className="p-4">
                     <div className="flex items-center gap-2 text-xs">
-                      <span className={`px-2 py-0.5 rounded-full ${e.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{e.status}</span>
-                      {e.start_at && <span className="text-muted-foreground">{new Date(e.start_at).toLocaleDateString()}</span>}
+                      <span
+                        className={`px-2 py-0.5 rounded-full ${e.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
+                      >
+                        {e.status}
+                      </span>
+                      {e.start_at && (
+                        <span className="text-muted-foreground">
+                          {new Date(e.start_at).toLocaleDateString()}
+                        </span>
+                      )}
                     </div>
                     <h3 className="mt-2 font-medium truncate">{e.name}</h3>
                   </div>
@@ -275,14 +402,30 @@ const TONES: Record<string, string> = {
   rose: "bg-rose-50 text-rose-700",
 };
 
-function Stat({ icon, label, value, tone = "sky", big = false }: { icon: React.ReactNode; label: string; value: string; tone?: keyof typeof TONES; big?: boolean }) {
+function Stat({
+  icon,
+  label,
+  value,
+  tone = "sky",
+  big = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  tone?: keyof typeof TONES;
+  big?: boolean;
+}) {
   return (
     <div className="rounded-2xl bg-white border border-black/5 p-5">
       <div className="flex items-center gap-2.5">
-        <span className={`h-8 w-8 shrink-0 rounded-lg grid place-items-center ${TONES[tone]}`}>{icon}</span>
+        <span className={`h-8 w-8 shrink-0 rounded-lg grid place-items-center ${TONES[tone]}`}>
+          {icon}
+        </span>
         <span className="text-sm font-medium text-muted-foreground truncate">{label}</span>
       </div>
-      <div className={`mt-3 font-display tabular-nums truncate ${big ? "text-4xl" : "text-2xl"}`}>{value}</div>
+      <div className={`mt-3 font-display tabular-nums truncate ${big ? "text-4xl" : "text-2xl"}`}>
+        {value}
+      </div>
     </div>
   );
 }

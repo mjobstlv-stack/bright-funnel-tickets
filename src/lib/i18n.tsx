@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { DirectionProvider } from "@radix-ui/react-direction";
 
 export type Lang = "he" | "en";
@@ -40,7 +48,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
-    try { window.localStorage.setItem(STORAGE_KEY, l); } catch {}
+    try {
+      window.localStorage.setItem(STORAGE_KEY, l);
+    } catch {}
   }, []);
 
   const toggle = useCallback(() => {
@@ -49,7 +59,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback((he: string, en: string) => (lang === "he" ? he : en), [lang]);
 
-  const value = useMemo<Ctx>(() => ({ lang, dir, setLang, toggle, t }), [lang, dir, setLang, toggle, t]);
+  const value = useMemo<Ctx>(
+    () => ({ lang, dir, setLang, toggle, t }),
+    [lang, dir, setLang, toggle, t],
+  );
 
   return (
     <LangContext.Provider value={value}>

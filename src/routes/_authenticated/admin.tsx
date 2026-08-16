@@ -27,7 +27,10 @@ export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
       { title: "ניהול מערכת | Event OS" },
-      { name: "description", content: "פאנל מנהל מערכת: עסקים ומשתמשים, מנויים ותשלומים, הפעלת מודולים וטיפול בתקלות." },
+      {
+        name: "description",
+        content: "פאנל מנהל מערכת: עסקים ומשתמשים, מנויים ותשלומים, הפעלת מודולים וטיפול בתקלות.",
+      },
       { property: "og:title", content: "ניהול מערכת | Event OS" },
       { property: "og:description", content: "ניהול לקוחות, חיובים, מודולים ותמיכה במקום אחד." },
       { property: "og:type", content: "website" },
@@ -69,10 +72,9 @@ function AdminConsole() {
             ? t("מוקפא", "Paused")
             : t("תקופת ניסיון", "Trial");
 
-  const statusTone = (s: string) => (s === "active" ? "default" : s === "past_due" ? "destructive" : "secondary") as
-    | "default"
-    | "destructive"
-    | "secondary";
+  const statusTone = (s: string) =>
+    (s === "active" ? "default" : s === "past_due" ? "destructive" : "secondary") as
+      "default" | "destructive" | "secondary";
 
   async function refresh() {
     try {
@@ -104,14 +106,18 @@ function AdminConsole() {
     if (!data) return [];
     const needle = q.trim().toLowerCase();
     return data.orgs.filter((o) =>
-      !needle ? true : `${o.name} ${o.slug} ${o.contact_email ?? ""}`.toLowerCase().includes(needle),
+      !needle
+        ? true
+        : `${o.name} ${o.slug} ${o.contact_email ?? ""}`.toLowerCase().includes(needle),
     );
   }, [data, q]);
 
   if (denied) {
     return (
       <Card className="p-6 border-black/10">
-        <p className="text-sm">{t("האזור הזה פתוח למנהלי המערכת בלבד.", "This area is for system administrators only.")}</p>
+        <p className="text-sm">
+          {t("האזור הזה פתוח למנהלי המערכת בלבד.", "This area is for system administrators only.")}
+        </p>
       </Card>
     );
   }
@@ -190,11 +196,14 @@ function AdminConsole() {
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
                   {o.contact_email ?? "—"} · {o.contact_phone ?? "—"} · {t("אירועים", "Events")}:{" "}
-                  {data.eventCounts[o.id] ?? 0} · {t("הזמנות מקום", "Reservations")}: {data.reservationCounts[o.id] ?? 0}
+                  {data.eventCounts[o.id] ?? 0} · {t("הזמנות מקום", "Reservations")}:{" "}
+                  {data.reservationCounts[o.id] ?? 0}
                 </div>
                 <div className="mt-3 divide-y divide-black/5">
                   {members.length === 0 && invites.length === 0 && (
-                    <p className="text-xs text-muted-foreground">{t("אין עדיין חברי צוות.", "No team members yet.")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("אין עדיין חברי צוות.", "No team members yet.")}
+                    </p>
                   )}
                   {members.map((m) => (
                     <div key={m.id} className="py-2 flex flex-wrap items-center gap-3 text-sm">
@@ -209,7 +218,9 @@ function AdminConsole() {
                           className="rounded-full"
                           disabled={busy}
                           onClick={() =>
-                            act(() => setMemberActive({ data: { memberId: m.id, isActive: !m.is_active } }))
+                            act(() =>
+                              setMemberActive({ data: { memberId: m.id, isActive: !m.is_active } }),
+                            )
                           }
                         >
                           {m.is_active ? t("הקפאה", "Freeze") : t("הפעלה", "Activate")}
@@ -222,9 +233,14 @@ function AdminConsole() {
                           onClick={() =>
                             act(async () => {
                               await sendPasswordReset({
-                                data: { email: m.email!, redirectTo: `${window.location.origin}/reset-password` },
+                                data: {
+                                  email: m.email!,
+                                  redirectTo: `${window.location.origin}/reset-password`,
+                                },
                               });
-                              toast.success(t("נשלח מייל לאיפוס סיסמה", "Password reset e-mail sent"));
+                              toast.success(
+                                t("נשלח מייל לאיפוס סיסמה", "Password reset e-mail sent"),
+                              );
                             })
                           }
                         >
@@ -236,7 +252,12 @@ function AdminConsole() {
                           className="rounded-full text-destructive"
                           disabled={busy}
                           onClick={() => {
-                            if (!window.confirm(t("למחוק את המשתמש מהעסק?", "Remove this user from the business?"))) return;
+                            if (
+                              !window.confirm(
+                                t("למחוק את המשתמש מהעסק?", "Remove this user from the business?"),
+                              )
+                            )
+                              return;
                             act(async () => {
                               await deleteMember({ data: { memberId: m.id } });
                               toast.success(t("המשתמש הוסר", "User removed"));
@@ -264,11 +285,17 @@ function AdminConsole() {
                           onClick={() =>
                             act(async () => {
                               const res = await resendInvite({
-                                data: { inviteId: i.id, redirectTo: `${window.location.origin}/reset-password` },
+                                data: {
+                                  inviteId: i.id,
+                                  redirectTo: `${window.location.origin}/reset-password`,
+                                },
                               });
                               toast.success(
                                 res.mailMode === "reset"
-                                  ? t("נשלח מייל לקביעת סיסמה (המשתמש כבר רשום)", "Sent a set-password e-mail (user already registered)")
+                                  ? t(
+                                      "נשלח מייל לקביעת סיסמה (המשתמש כבר רשום)",
+                                      "Sent a set-password e-mail (user already registered)",
+                                    )
                                   : t("מייל ההזמנה נשלח מחדש", "Invitation e-mail resent"),
                               );
                             })
@@ -308,7 +335,9 @@ function AdminConsole() {
                     tone={statusTone}
                     busy={busy}
                     sub={sub}
-                    onSave={(patch) => act(() => saveSubscription({ data: { orgId: o.id, module, ...patch } }))}
+                    onSave={(patch) =>
+                      act(() => saveSubscription({ data: { orgId: o.id, module, ...patch } }))
+                    }
                     t={t}
                   />
                 );
@@ -323,12 +352,17 @@ function AdminConsole() {
               <div className="font-medium">{o.name}</div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 {MODULES.map((module) => (
-                  <label key={module} className="flex items-center justify-between gap-3 rounded-lg border border-black/10 px-3 py-2">
+                  <label
+                    key={module}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-black/10 px-3 py-2"
+                  >
                     <span className="text-sm">{moduleLabel(module)}</span>
                     <Switch
                       checked={moduleOn(o.id, module)}
                       disabled={busy}
-                      onCheckedChange={(v) => act(() => setOrgModule({ data: { orgId: o.id, module, enabled: v } }))}
+                      onCheckedChange={(v) =>
+                        act(() => setOrgModule({ data: { orgId: o.id, module, enabled: v } }))
+                      }
                     />
                   </label>
                 ))}
@@ -340,7 +374,9 @@ function AdminConsole() {
         <TabsContent value="support" className="space-y-4">
           {data.tickets.length === 0 && (
             <Card className="p-6 border-black/10">
-              <p className="text-sm text-muted-foreground">{t("אין תקלות פתוחות.", "No tickets yet.")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("אין תקלות פתוחות.", "No tickets yet.")}
+              </p>
             </Card>
           )}
           {data.tickets.map((ticket) => {
@@ -349,13 +385,20 @@ function AdminConsole() {
               <Card key={ticket.id} className="p-5 border-black/10 space-y-3">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="font-medium">{ticket.subject}</div>
-                  <Badge variant={ticket.priority === "urgent" ? "destructive" : "outline"}>{ticket.priority}</Badge>
-                  <Badge variant={ticket.status === "resolved" ? "secondary" : "default"}>{ticket.status}</Badge>
+                  <Badge variant={ticket.priority === "urgent" ? "destructive" : "outline"}>
+                    {ticket.priority}
+                  </Badge>
+                  <Badge variant={ticket.status === "resolved" ? "secondary" : "default"}>
+                    {ticket.status}
+                  </Badge>
                   <span className="ms-auto text-xs text-muted-foreground">
-                    {org?.name ?? t("ללא עסק", "No business")} · {new Date(ticket.created_at).toLocaleString("he-IL")}
+                    {org?.name ?? t("ללא עסק", "No business")} ·{" "}
+                    {new Date(ticket.created_at).toLocaleString("he-IL")}
                   </span>
                 </div>
-                {ticket.body && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{ticket.body}</p>}
+                {ticket.body && (
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{ticket.body}</p>
+                )}
                 <TicketControls ticket={ticket} busy={busy} act={act} t={t} />
               </Card>
             );
@@ -364,7 +407,9 @@ function AdminConsole() {
 
         <TabsContent value="log" className="space-y-4">
           <Card className="p-5 border-black/10">
-            <div className="text-sm font-medium">{t("יומן פעולות ניהול", "System admin action log")}</div>
+            <div className="text-sm font-medium">
+              {t("יומן פעולות ניהול", "System admin action log")}
+            </div>
             <p className="mt-1 text-xs text-muted-foreground">
               {t(
                 "מחיקה, הקפאה/הפעלה, איפוס סיסמה ושליחת הזמנות מחדש — עם תאריך ושעת ביצוע.",
@@ -373,7 +418,9 @@ function AdminConsole() {
             </p>
             <div className="mt-4 space-y-2">
               {(data.adminLog ?? []).length === 0 && (
-                <p className="text-sm text-muted-foreground">{t("עדיין לא בוצעו פעולות.", "No actions recorded yet.")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("עדיין לא בוצעו פעולות.", "No actions recorded yet.")}
+                </p>
               )}
               {(data.adminLog ?? [])
                 .filter((row) => {
@@ -386,7 +433,11 @@ function AdminConsole() {
                 })
                 .map((row) => {
                   const org = data.orgs.find((o) => o.id === row.org_id);
-                  const meta = ADMIN_ACTIONS[row.action] ?? { he: row.action, en: row.action, tone: "outline" as const };
+                  const meta = ADMIN_ACTIONS[row.action] ?? {
+                    he: row.action,
+                    en: row.action,
+                    tone: "outline" as const,
+                  };
                   return (
                     <div
                       key={row.id}
@@ -415,7 +466,10 @@ function AdminConsole() {
   );
 }
 
-const ADMIN_ACTIONS: Record<string, { he: string; en: string; tone: "default" | "secondary" | "destructive" | "outline" }> = {
+const ADMIN_ACTIONS: Record<
+  string,
+  { he: string; en: string; tone: "default" | "secondary" | "destructive" | "outline" }
+> = {
   member_deleted: { he: "מחיקת משתמש", en: "User deleted", tone: "destructive" },
   member_frozen: { he: "הקפאת משתמש", en: "User frozen", tone: "secondary" },
   member_activated: { he: "הפעלת משתמש", en: "User activated", tone: "default" },
@@ -434,9 +488,21 @@ function SubscriptionRow({
   t,
 }: {
   label: string;
-  sub?: { status: string; plan: string; amount: number; current_period_end: string | null; notes: string | null };
+  sub?: {
+    status: string;
+    plan: string;
+    amount: number;
+    current_period_end: string | null;
+    notes: string | null;
+  };
   busy: boolean;
-  onSave: (patch: { plan?: string; status?: Status; amount?: number; current_period_end?: string | null; notes?: string | null }) => void;
+  onSave: (patch: {
+    plan?: string;
+    status?: Status;
+    amount?: number;
+    current_period_end?: string | null;
+    notes?: string | null;
+  }) => void;
   statusLabel: (s: string) => string;
   tone: (s: string) => "default" | "destructive" | "secondary";
   t: (he: string, en: string) => string;
@@ -466,7 +532,13 @@ function SubscriptionRow({
         </div>
         <div>
           <Label className="text-xs">{t("סכום חודשי (₪)", "Monthly (₪)")}</Label>
-          <Input className="mt-1" type="number" min={0} value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <Input
+            className="mt-1"
+            type="number"
+            min={0}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
         </div>
         <div>
           <Label className="text-xs">{t("סטטוס", "Status")}</Label>
@@ -484,7 +556,12 @@ function SubscriptionRow({
         </div>
         <div>
           <Label className="text-xs">{t("חידוש", "Renews")}</Label>
-          <Input className="mt-1" type="date" value={renew} onChange={(e) => setRenew(e.target.value)} />
+          <Input
+            className="mt-1"
+            type="date"
+            value={renew}
+            onChange={(e) => setRenew(e.target.value)}
+          />
         </div>
         <Button
           className="rounded-full"
@@ -521,7 +598,12 @@ function TicketControls({
     <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto] items-end">
       <div>
         <Label className="text-xs">{t("הערות פנימיות", "Internal notes")}</Label>
-        <Textarea className="mt-1" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <Textarea
+          className="mt-1"
+          rows={2}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
       </div>
       <select
         className="h-10 rounded-md border border-input bg-background px-3 text-sm"
@@ -530,7 +612,10 @@ function TicketControls({
         onChange={(e) =>
           act(() =>
             updateSupportTicket({
-              data: { id: ticket.id, priority: e.target.value as "low" | "normal" | "high" | "urgent" },
+              data: {
+                id: ticket.id,
+                priority: e.target.value as "low" | "normal" | "high" | "urgent",
+              },
             }),
           )
         }
@@ -547,7 +632,10 @@ function TicketControls({
         onChange={(e) =>
           act(() =>
             updateSupportTicket({
-              data: { id: ticket.id, status: e.target.value as "open" | "in_progress" | "waiting" | "resolved" },
+              data: {
+                id: ticket.id,
+                status: e.target.value as "open" | "in_progress" | "waiting" | "resolved",
+              },
             }),
           )
         }
@@ -561,7 +649,9 @@ function TicketControls({
         variant="outline"
         className="rounded-full"
         disabled={busy}
-        onClick={() => act(() => updateSupportTicket({ data: { id: ticket.id, internal_notes: notes || null } }))}
+        onClick={() =>
+          act(() => updateSupportTicket({ data: { id: ticket.id, internal_notes: notes || null } }))
+        }
       >
         {t("שמירת הערה", "Save note")}
       </Button>

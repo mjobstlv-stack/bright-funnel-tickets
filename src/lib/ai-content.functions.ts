@@ -15,10 +15,42 @@ export type ParsedEventContent = {
 };
 
 const ALLOWED_ICONS = [
-  "Music","Mic","Headphones","PartyPopper","Utensils","Wine","Gift","Camera",
-  "Users","Star","Trophy","Heart","MapPin","Calendar","Clock","Ticket","Video",
-  "Sparkles","Flame","Sun","Wifi","Car","Bus","Train","Accessibility","Baby",
-  "Dog","Coffee","Cake","Beer","IceCream","Shirt","Tent","Tv","Gamepad2","Book",
+  "Music",
+  "Mic",
+  "Headphones",
+  "PartyPopper",
+  "Utensils",
+  "Wine",
+  "Gift",
+  "Camera",
+  "Users",
+  "Star",
+  "Trophy",
+  "Heart",
+  "MapPin",
+  "Calendar",
+  "Clock",
+  "Ticket",
+  "Video",
+  "Sparkles",
+  "Flame",
+  "Sun",
+  "Wifi",
+  "Car",
+  "Bus",
+  "Train",
+  "Accessibility",
+  "Baby",
+  "Dog",
+  "Coffee",
+  "Cake",
+  "Beer",
+  "IceCream",
+  "Shirt",
+  "Tent",
+  "Tv",
+  "Gamepad2",
+  "Book",
 ];
 
 export const parseEventContent = createServerFn({ method: "POST" })
@@ -77,25 +109,43 @@ Rules:
     const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const content = json.choices?.[0]?.message?.content ?? "";
     let parsed: Partial<ParsedEventContent>;
-    try { parsed = JSON.parse(content) as Partial<ParsedEventContent>; }
-    catch { throw new Error("AI returned invalid JSON"); }
+    try {
+      parsed = JSON.parse(content) as Partial<ParsedEventContent>;
+    } catch {
+      throw new Error("AI returned invalid JSON");
+    }
 
     const iconSet = new Set(ALLOWED_ICONS);
-    const includes = Array.isArray(parsed.includes) ? parsed.includes
-      .filter((i) => i && typeof i.text === "string" && i.text.trim())
-      .slice(0, 12)
-      .map((i) => ({
-        icon: i.icon && iconSet.has(i.icon) ? i.icon : "Sparkles",
-        text: String(i.text).slice(0, 280),
-      })) : [];
-    const faq = Array.isArray(parsed.faq) ? parsed.faq
-      .filter((f) => f && typeof f.question === "string" && typeof f.answer === "string" && f.question.trim())
-      .slice(0, 12)
-      .map((f) => ({ question: String(f.question).slice(0, 200), answer: String(f.answer).slice(0, 1200) })) : [];
-    const rules = Array.isArray(parsed.rules) ? parsed.rules
-      .filter((r) => typeof r === "string" && r.trim())
-      .slice(0, 12)
-      .map((r) => String(r).slice(0, 280)) : [];
+    const includes = Array.isArray(parsed.includes)
+      ? parsed.includes
+          .filter((i) => i && typeof i.text === "string" && i.text.trim())
+          .slice(0, 12)
+          .map((i) => ({
+            icon: i.icon && iconSet.has(i.icon) ? i.icon : "Sparkles",
+            text: String(i.text).slice(0, 280),
+          }))
+      : [];
+    const faq = Array.isArray(parsed.faq)
+      ? parsed.faq
+          .filter(
+            (f) =>
+              f &&
+              typeof f.question === "string" &&
+              typeof f.answer === "string" &&
+              f.question.trim(),
+          )
+          .slice(0, 12)
+          .map((f) => ({
+            question: String(f.question).slice(0, 200),
+            answer: String(f.answer).slice(0, 1200),
+          }))
+      : [];
+    const rules = Array.isArray(parsed.rules)
+      ? parsed.rules
+          .filter((r) => typeof r === "string" && r.trim())
+          .slice(0, 12)
+          .map((r) => String(r).slice(0, 280))
+      : [];
     const lo = (parsed.location ?? {}) as ParsedEventContent["location"];
     const location: ParsedEventContent["location"] = {
       address: typeof lo.address === "string" ? lo.address.slice(0, 300) : "",

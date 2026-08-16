@@ -2,9 +2,17 @@ export type LogoSpot = { x: number; y: number; scale: number };
 export type LogoDeviceSpots = { mobile?: LogoSpot; desktop?: LogoSpot };
 export type OverlayDirection = "bottom" | "top" | "full" | "center";
 export type CoverOverlay = { intensity: number; direction: OverlayDirection; color: string };
-export type LogoLayout = { banner?: LogoDeviceSpots; circle?: LogoDeviceSpots; overlay?: CoverOverlay };
+export type LogoLayout = {
+  banner?: LogoDeviceSpots;
+  circle?: LogoDeviceSpots;
+  overlay?: CoverOverlay;
+};
 
-export const DEFAULT_OVERLAY: CoverOverlay = { intensity: 0, direction: "bottom", color: "#000000" };
+export const DEFAULT_OVERLAY: CoverOverlay = {
+  intensity: 0,
+  direction: "bottom",
+  color: "#000000",
+};
 
 /** Accepts #rgb / #rrggbb, falls back to black. */
 function readColor(v: unknown): string {
@@ -15,7 +23,11 @@ function readColor(v: unknown): string {
 
 function toRgb(hex: string): [number, number, number] {
   let h = hex.slice(1);
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const n = parseInt(h, 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
@@ -24,7 +36,9 @@ export function readOverlay(layout: LogoLayout | null | undefined): CoverOverlay
   const o = layout?.overlay;
   if (!o) return DEFAULT_OVERLAY;
   const intensity = Math.min(90, Math.max(0, Number(o.intensity) || 0));
-  const direction: OverlayDirection = (["bottom", "top", "full", "center"] as const).includes(o.direction as OverlayDirection)
+  const direction: OverlayDirection = (["bottom", "top", "full", "center"] as const).includes(
+    o.direction as OverlayDirection,
+  )
     ? (o.direction as OverlayDirection)
     : "bottom";
   return { intensity, direction, color: readColor(o.color) };

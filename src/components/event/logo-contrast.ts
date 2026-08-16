@@ -4,7 +4,11 @@ export type Rgb = [number, number, number];
 
 export function hexToRgb(hex: string): Rgb {
   let h = hex.replace("#", "");
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const n = parseInt(h, 16) || 0;
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
@@ -75,7 +79,10 @@ function loadImage(src: string) {
 }
 
 function averagePixels(data: Uint8ClampedArray, opaqueOnly: boolean): SampleResult {
-  let r = 0, g = 0, b = 0, n = 0;
+  let r = 0,
+    g = 0,
+    b = 0,
+    n = 0;
   for (let i = 0; i < data.length; i += 4) {
     const a = data[i + 3];
     if (opaqueOnly && a < 128) continue;
@@ -89,11 +96,16 @@ function averagePixels(data: Uint8ClampedArray, opaqueOnly: boolean): SampleResu
 }
 
 /** Average color of the cover image inside the box the logo occupies. */
-export async function sampleCoverColor(src: string, spot: LogoSpot, box = 0.28): Promise<SampleResult> {
+export async function sampleCoverColor(
+  src: string,
+  spot: LogoSpot,
+  box = 0.28,
+): Promise<SampleResult> {
   const img = await loadImage(src);
   if (!img) return { color: [128, 128, 128], ok: false };
   const canvas = document.createElement("canvas");
-  const w = 64, h = 64;
+  const w = 64,
+    h = 64;
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext("2d");
@@ -176,5 +188,12 @@ export function buildReport({
       break;
     }
   }
-  return { ratio, verdict: verdictOf(ratio), backdrop, logo: logoColor, suggestedIntensity: suggested, exact };
+  return {
+    ratio,
+    verdict: verdictOf(ratio),
+    backdrop,
+    logo: logoColor,
+    suggestedIntensity: suggested,
+    exact,
+  };
 }

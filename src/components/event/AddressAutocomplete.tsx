@@ -10,11 +10,15 @@ function loadMaps(): Promise<void> {
   if (w.google?.maps) return Promise.resolve();
   if (loaderPromise) return loaderPromise;
   const key = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY as string | undefined;
-  const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID as string | undefined;
+  const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID as
+    string | undefined;
   if (!key) return Promise.reject(new Error("Missing Google Maps browser key"));
   loaderPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>('script[data-gmaps="1"]');
-    if (existing) { existing.addEventListener("load", () => resolve()); return; }
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      return;
+    }
     const s = document.createElement("script");
     s.async = true;
     s.defer = true;
@@ -63,14 +67,23 @@ export function AddressAutocomplete({
 
   useEffect(() => {
     const q = value.trim();
-    if (q.length < 2) { setItems([]); return; }
+    if (q.length < 2) {
+      setItems([]);
+      return;
+    }
     let cancelled = false;
     const id = setTimeout(async () => {
       try {
         await loadMaps();
-        const g = (window as unknown as { google: { maps: { importLibrary: (n: string) => Promise<unknown> } } }).google;
+        const g = (
+          window as unknown as {
+            google: { maps: { importLibrary: (n: string) => Promise<unknown> } };
+          }
+        ).google;
         const places = (await g.maps.importLibrary("places")) as {
-          AutocompleteSuggestion: { fetchAutocompleteSuggestions: (req: unknown) => Promise<{ suggestions: unknown[] }> };
+          AutocompleteSuggestion: {
+            fetchAutocompleteSuggestions: (req: unknown) => Promise<{ suggestions: unknown[] }>;
+          };
           AutocompleteSessionToken: new () => unknown;
         };
         if (!tokenRef.current) tokenRef.current = new places.AutocompleteSessionToken();
@@ -82,7 +95,8 @@ export function AddressAutocomplete({
         if (cancelled) return;
         const mapped: Suggestion[] = res.suggestions
           .map((s) => {
-            const p = (s as { placePrediction?: { placeId?: string; text?: { text?: string } } }).placePrediction;
+            const p = (s as { placePrediction?: { placeId?: string; text?: { text?: string } } })
+              .placePrediction;
             if (!p?.placeId || !p.text?.text) return null;
             return { placeId: p.placeId, text: p.text.text };
           })
@@ -93,7 +107,10 @@ export function AddressAutocomplete({
         // silent
       }
     }, 220);
-    return () => { cancelled = true; clearTimeout(id); };
+    return () => {
+      cancelled = true;
+      clearTimeout(id);
+    };
   }, [value, lang]);
 
   const pick = (s: Suggestion) => {
@@ -110,7 +127,9 @@ export function AddressAutocomplete({
         placeholder={placeholder}
         dir={dir}
         onChange={(e) => onChange(e.target.value)}
-        onFocus={() => { if (items.length) setOpen(true); }}
+        onFocus={() => {
+          if (items.length) setOpen(true);
+        }}
         autoComplete="off"
       />
       {open && items.length > 0 && (

@@ -3,7 +3,13 @@ import { Loader2, CheckCircle2, Instagram, Facebook, Upload, X } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { submitTicketRequest } from "@/lib/requests.functions";
 
@@ -51,7 +57,9 @@ function ShotUpload({
 
   return (
     <div>
-      <Label className="flex items-center gap-1.5">{icon} {label} {required && "*"}</Label>
+      <Label className="flex items-center gap-1.5">
+        {icon} {label} {required && "*"}
+      </Label>
       {value ? (
         <div className="mt-1.5 relative rounded-lg overflow-hidden border border-black/10">
           <img src={value} alt={`${label} screenshot`} className="w-full max-h-56 object-cover" />
@@ -70,12 +78,22 @@ function ShotUpload({
           onClick={() => inputRef.current?.click()}
           className="mt-1.5 w-full h-24 rounded-lg border border-dashed border-black/20 grid place-items-center text-xs text-muted-foreground hover:border-black/40 transition"
         >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : (
-            <span className="inline-flex items-center gap-1.5"><Upload className="h-3.5 w-3.5" /> Upload a screenshot of your profile</span>
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <span className="inline-flex items-center gap-1.5">
+              <Upload className="h-3.5 w-3.5" /> Upload a screenshot of your profile
+            </span>
           )}
         </button>
       )}
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => void pick(e.target.files?.[0])} />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => void pick(e.target.files?.[0])}
+      />
     </div>
   );
 }
@@ -106,21 +124,32 @@ export function RequestDialog({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!event) return;
-    if (requireInstagram && !ig) { toast.error("Instagram profile screenshot is required"); return; }
-    if (requireFacebook && !fb) { toast.error("Facebook profile screenshot is required"); return; }
-    if (!ig && !fb) { toast.error("At least one profile screenshot is required"); return; }
+    if (requireInstagram && !ig) {
+      toast.error("Instagram profile screenshot is required");
+      return;
+    }
+    if (requireFacebook && !fb) {
+      toast.error("Facebook profile screenshot is required");
+      return;
+    }
+    if (!ig && !fb) {
+      toast.error("At least one profile screenshot is required");
+      return;
+    }
     setBusy(true);
     try {
-      await submitTicketRequest({ data: {
-        eventId: event.id,
-        ticketTypeId: ticketId || null,
-        buyerName: buyer.name.trim(),
-        buyerEmail: buyer.email.trim(),
-        buyerPhone: buyer.phone.trim() || null,
-        instagramShot: ig,
-        facebookShot: fb,
-        quantity: qty,
-      } });
+      await submitTicketRequest({
+        data: {
+          eventId: event.id,
+          ticketTypeId: ticketId || null,
+          buyerName: buyer.name.trim(),
+          buyerEmail: buyer.email.trim(),
+          buyerPhone: buyer.phone.trim() || null,
+          instagramShot: ig,
+          facebookShot: fb,
+          quantity: qty,
+        },
+      });
       setDone(true);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Submission failed");
@@ -133,7 +162,9 @@ export function RequestDialog({
     if (!v) {
       setDone(false);
       setBuyer({ name: "", email: "", phone: "" });
-      setIg(null); setFb(null); setQty(1);
+      setIg(null);
+      setFb(null);
+      setQty(1);
     }
     onOpenChange(v);
   }
@@ -148,45 +179,100 @@ export function RequestDialog({
             </div>
             <DialogTitle className="text-xl">Request submitted</DialogTitle>
             <DialogDescription className="max-w-sm mx-auto">
-              We'll review your profile and email you a payment link if approved. This usually takes a few minutes.
+              We'll review your profile and email you a payment link if approved. This usually takes
+              a few minutes.
             </DialogDescription>
-            <Button onClick={() => close(false)} className="rounded-full mt-2">Close</Button>
+            <Button onClick={() => close(false)} className="rounded-full mt-2">
+              Close
+            </Button>
           </div>
         ) : (
           <>
             <DialogHeader>
               <DialogTitle>Request to attend</DialogTitle>
               <DialogDescription>
-                This event requires approval. Share your details and screenshots of your social profiles — we'll review and email you a payment link if approved.
+                This event requires approval. Share your details and screenshots of your social
+                profiles — we'll review and email you a payment link if approved.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={submit} className="space-y-3 mt-2">
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>Full name *</Label><Input required value={buyer.name} onChange={(e) => setBuyer({ ...buyer, name: e.target.value })} className="mt-1.5" /></div>
-                <div><Label>Email *</Label><Input required type="email" value={buyer.email} onChange={(e) => setBuyer({ ...buyer, email: e.target.value })} className="mt-1.5" /></div>
+                <div>
+                  <Label>Full name *</Label>
+                  <Input
+                    required
+                    value={buyer.name}
+                    onChange={(e) => setBuyer({ ...buyer, name: e.target.value })}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Email *</Label>
+                  <Input
+                    required
+                    type="email"
+                    value={buyer.email}
+                    onChange={(e) => setBuyer({ ...buyer, email: e.target.value })}
+                    className="mt-1.5"
+                  />
+                </div>
               </div>
-              <div><Label>Phone</Label><Input value={buyer.phone} onChange={(e) => setBuyer({ ...buyer, phone: e.target.value })} className="mt-1.5" /></div>
-              <ShotUpload label="Instagram profile screenshot" icon={<Instagram className="h-3.5 w-3.5" />} required={requireInstagram} value={ig} onChange={setIg} />
-              <ShotUpload label="Facebook profile screenshot" icon={<Facebook className="h-3.5 w-3.5" />} required={requireFacebook} value={fb} onChange={setFb} />
+              <div>
+                <Label>Phone</Label>
+                <Input
+                  value={buyer.phone}
+                  onChange={(e) => setBuyer({ ...buyer, phone: e.target.value })}
+                  className="mt-1.5"
+                />
+              </div>
+              <ShotUpload
+                label="Instagram profile screenshot"
+                icon={<Instagram className="h-3.5 w-3.5" />}
+                required={requireInstagram}
+                value={ig}
+                onChange={setIg}
+              />
+              <ShotUpload
+                label="Facebook profile screenshot"
+                icon={<Facebook className="h-3.5 w-3.5" />}
+                required={requireFacebook}
+                value={fb}
+                onChange={setFb}
+              />
               {tickets.length > 1 && (
                 <div>
                   <Label>Ticket type</Label>
-                  <select className="mt-1.5 w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm" value={ticketId} onChange={(e) => setTicketId(e.target.value)}>
+                  <select
+                    className="mt-1.5 w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+                    value={ticketId}
+                    onChange={(e) => setTicketId(e.target.value)}
+                  >
                     {tickets.map((t) => (
-                      <option key={t.id} value={t.id}>{t.name} — {event?.currency} {t.price.toLocaleString()}</option>
+                      <option key={t.id} value={t.id}>
+                        {t.name} — {event?.currency} {t.price.toLocaleString()}
+                      </option>
                     ))}
                   </select>
                 </div>
               )}
               <div>
                 <Label>Guests</Label>
-                <Input type="number" min={1} max={10} value={qty} onChange={(e) => setQty(Math.max(1, Math.min(10, Number(e.target.value) || 1)))} className="mt-1.5 w-24" />
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={qty}
+                  onChange={(e) => setQty(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
+                  className="mt-1.5 w-24"
+                />
               </div>
               <Button type="submit" disabled={busy} className="w-full h-11 rounded-full mt-2">
                 {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
                 {busy ? "Submitting…" : "Submit for approval"}
               </Button>
-              <p className="text-[11px] text-center text-muted-foreground">You won't be charged until you're approved and complete payment.</p>
+              <p className="text-[11px] text-center text-muted-foreground">
+                You won't be charged until you're approved and complete payment.
+              </p>
             </form>
           </>
         )}

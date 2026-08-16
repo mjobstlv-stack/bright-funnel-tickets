@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Landing } from "@/components/landing/Landing";
 
 const TITLE = "Event OS — The operating system for live events";
-const DESC = "Ticketing, restaurant reservations, staff scheduling, time clock, inventory, POS and live P&L — one workspace for events and venues.";
+const DESC =
+  "Ticketing, restaurant reservations, staff scheduling, time clock, inventory, POS and live P&L — one workspace for events and venues.";
 
 export const Route = createFileRoute("/en")({
   head: () => ({

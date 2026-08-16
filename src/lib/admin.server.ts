@@ -9,7 +9,11 @@ export type ModuleKey = (typeof MODULES)[number];
 
 /** Throws unless the signed-in user is a platform (system) administrator. */
 export async function requirePlatformAdmin(admin: Admin, userId: string) {
-  const { data } = await admin.from("platform_admins").select("user_id").eq("user_id", userId).maybeSingle();
+  const { data } = await admin
+    .from("platform_admins")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
   if (!data) throw new Error("Forbidden: platform admins only");
   return userId;
 }

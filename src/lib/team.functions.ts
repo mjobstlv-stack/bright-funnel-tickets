@@ -70,7 +70,9 @@ export const getTeam = createServerFn({ method: "POST" })
 
     const { data: invites } = await supabaseAdmin
       .from("org_invites")
-      .select("id, email, display_name, role, created_at, mail_status, last_sent_at, send_count, opened_at")
+      .select(
+        "id, email, display_name, role, created_at, mail_status, last_sent_at, send_count, opened_at",
+      )
       .eq("org_id", me.orgId)
       .is("accepted_at", null)
       .order("created_at", { ascending: true });
@@ -98,7 +100,10 @@ export const inviteTeamMember = createServerFn({ method: "POST" })
     const email = data.email.trim().toLowerCase();
 
     const [{ count: memberCount }, { count: inviteCount }] = await Promise.all([
-      supabaseAdmin.from("org_members").select("id", { count: "exact", head: true }).eq("org_id", me.orgId),
+      supabaseAdmin
+        .from("org_members")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", me.orgId),
       supabaseAdmin
         .from("org_invites")
         .select("id", { count: "exact", head: true })
@@ -109,14 +114,21 @@ export const inviteTeamMember = createServerFn({ method: "POST" })
       throw new Error(`הגעת למכסת ${SEAT_LIMIT} המשתמשים בעסק`);
     }
 
-    const { data: inserted, error } = await supabaseAdmin.from("org_invites").insert({
-      org_id: me.orgId,
-      email,
-      display_name: data.display_name,
-      role: data.role,
-      invited_by: context.userId,
-    }).select("id").maybeSingle();
-    if (error) throw new Error(error.message.includes("duplicate") ? "כבר קיימת הזמנה לכתובת הזו" : error.message);
+    const { data: inserted, error } = await supabaseAdmin
+      .from("org_invites")
+      .insert({
+        org_id: me.orgId,
+        email,
+        display_name: data.display_name,
+        role: data.role,
+        invited_by: context.userId,
+      })
+      .select("id")
+      .maybeSingle();
+    if (error)
+      throw new Error(
+        error.message.includes("duplicate") ? "כבר קיימת הזמנה לכתובת הזו" : error.message,
+      );
 
     const mail = await sendTeamInviteEmail(supabaseAdmin, {
       email,
@@ -207,7 +219,11 @@ export const cancelTeamInvite = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const me = await requireOrgAdmin(supabaseAdmin, context.userId);
-    const { error } = await supabaseAdmin.from("org_invites").delete().eq("id", data.id).eq("org_id", me.orgId);
+    const { error } = await supabaseAdmin
+      .from("org_invites")
+      .delete()
+      .eq("id", data.id)
+      .eq("org_id", me.orgId);
     if (error) throw new Error(error.message);
     await logActivity(supabaseAdmin, {
       orgId: me.orgId,
@@ -233,7 +249,10 @@ export const getTeamInviteLink = createServerFn({ method: "POST" })
       .eq("org_id", me.orgId)
       .maybeSingle();
     if (!invite || invite.accepted_at) throw new Error("ההזמנה לא נמצאה או שכבר אושרה");
-    const link = await buildInviteLink(supabaseAdmin, { email: invite.email, redirectTo: data.redirectTo });
+    const link = await buildInviteLink(supabaseAdmin, {
+      email: invite.email,
+      redirectTo: data.redirectTo,
+    });
     if (!link) throw new Error("לא הצלחנו לייצר קישור הזמנה. נסי שוב בעוד רגע.");
     return { ok: true, email: invite.email, link };
   });
@@ -256,7 +275,11 @@ export const updateTeamMember = createServerFn({ method: "POST" })
       throw new Error("אי אפשר להוריד לעצמך הרשאות ניהול");
     }
 
-    const patch: { role?: "admin" | "manager" | "staff"; is_active?: boolean; display_name?: string } = {};
+    const patch: {
+      role?: "admin" | "manager" | "staff";
+      is_active?: boolean;
+      display_name?: string;
+    } = {};
     if (data.role) patch.role = data.role;
     if (typeof data.is_active === "boolean") patch.is_active = data.is_active;
     if (data.display_name) patch.display_name = data.display_name;
@@ -311,7 +334,9 @@ export const getActivityLog = createServerFn({ method: "POST" })
     const me = await requireMembership(supabaseAdmin, context.userId);
     let q = supabaseAdmin
       .from("activity_log")
-      .select("id, actor_name, actor_email, actor_role, action, entity, entity_id, event_id, summary, meta, created_at")
+      .select(
+        "id, actor_name, actor_email, actor_role, action, entity, entity_id, event_id, summary, meta, created_at",
+      )
       .eq("org_id", me.orgId)
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 100);

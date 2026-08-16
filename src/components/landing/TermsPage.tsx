@@ -5,20 +5,29 @@ export function TermsPage({ lang }: { lang: "he" | "en" }) {
   const isHe = lang === "he";
   const c = isHe ? he : en;
   return (
-    <div dir={isHe ? "rtl" : "ltr"} lang={lang} className="min-h-screen bg-cream text-ink font-sans">
+    <div
+      dir={isHe ? "rtl" : "ltr"}
+      lang={lang}
+      className="min-h-screen bg-cream text-ink font-sans"
+    >
       <header className="sticky top-0 z-50 bg-cream/90 backdrop-blur-xl border-b border-ink/10">
         <div className="mx-auto max-w-4xl px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5">
             <img src={logoAsset.url} alt="Event OS" className="h-9" />
           </Link>
-          <Link to={isHe ? "/en/terms" : "/terms"} className="text-sm text-ink/70 hover:text-ink transition">
+          <Link
+            to={isHe ? "/en/terms" : "/terms"}
+            className="text-sm text-ink/70 hover:text-ink transition"
+          >
             {isHe ? "English" : "עברית"}
           </Link>
         </div>
       </header>
 
       <main className="mx-auto max-w-3xl px-5 sm:px-8 py-16 sm:py-24">
-        <h1 className="font-display text-4xl sm:text-5xl leading-tight uppercase mb-6">{c.title}</h1>
+        <h1 className="font-display text-4xl sm:text-5xl leading-tight uppercase mb-6">
+          {c.title}
+        </h1>
         <p className="text-sm text-ink/60 mb-12">{c.lastUpdated}</p>
 
         <div className="space-y-10">
@@ -35,16 +44,17 @@ export function TermsPage({ lang }: { lang: "he" | "en" }) {
         </div>
 
         <div className="mt-16 pt-8 border-t border-ink/15">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-ink hover:text-leaf transition">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-ink hover:text-leaf transition"
+          >
             {c.back}
           </Link>
         </div>
       </main>
 
       <footer className="border-t border-ink/15 bg-cream">
-        <div className="mx-auto max-w-4xl px-5 sm:px-8 py-8 text-xs text-ink/60">
-          {c.footer}
-        </div>
+        <div className="mx-auto max-w-4xl px-5 sm:px-8 py-8 text-xs text-ink/60">{c.footer}</div>
       </footer>
     </div>
   );

@@ -35,9 +35,13 @@ export async function resolveMembership(admin: Admin, userId: string): Promise<M
     .limit(1);
   const member = memberRows?.[0] ?? null;
 
-  const m = member as unknown as
-    | { org_id: string; role: OrgRole; display_name: string | null; email: string | null; organizations: { name: string } }
-    | null;
+  const m = member as unknown as {
+    org_id: string;
+    role: OrgRole;
+    display_name: string | null;
+    email: string | null;
+    organizations: { name: string };
+  } | null;
 
   if (owned) {
     return {
@@ -75,7 +79,11 @@ export async function requireOrgAdmin(admin: Admin, userId: string): Promise<Mem
 }
 
 /** True when the user is the owner or an active member of the organization. */
-export async function userHasOrgAccess(admin: Admin, userId: string, orgId: string): Promise<boolean> {
+export async function userHasOrgAccess(
+  admin: Admin,
+  userId: string,
+  orgId: string,
+): Promise<boolean> {
   const { data: owned } = await admin
     .from("organizations")
     .select("id")
@@ -143,7 +151,11 @@ export async function logActivity(
 }
 
 /** Turn any pending invite for this e-mail into an active membership. */
-export async function acceptInvitesForUser(admin: Admin, userId: string, email: string | null | undefined) {
+export async function acceptInvitesForUser(
+  admin: Admin,
+  userId: string,
+  email: string | null | undefined,
+) {
   if (!email) return null;
   const lower = email.trim().toLowerCase();
   const { data: invites } = await admin
@@ -177,7 +189,12 @@ export async function acceptInvitesForUser(admin: Admin, userId: string, email: 
   return match.org_id;
 }
 
-export type InviteMailResult = { sent: boolean; mode: "invite" | "reset" | "none"; reason?: string; link?: string | null };
+export type InviteMailResult = {
+  sent: boolean;
+  mode: "invite" | "reset" | "none";
+  reason?: string;
+  link?: string | null;
+};
 
 /**
  * Deliver a team invitation by e-mail through Supabase Auth.
@@ -186,7 +203,12 @@ export type InviteMailResult = { sent: boolean; mode: "invite" | "reset" | "none
  */
 export async function sendTeamInviteEmail(
   admin: Admin,
-  input: { email: string; displayName?: string | null; orgName?: string | null; redirectTo: string },
+  input: {
+    email: string;
+    displayName?: string | null;
+    orgName?: string | null;
+    redirectTo: string;
+  },
 ): Promise<InviteMailResult> {
   const email = input.email.trim().toLowerCase();
 
@@ -231,7 +253,12 @@ export async function sendTeamInviteEmail(
     options: { redirectTo: input.redirectTo },
   });
   if (!genError) {
-    return { sent: false, mode: "invite", link: linkData?.properties?.action_link ?? null, reason: error.message };
+    return {
+      sent: false,
+      mode: "invite",
+      link: linkData?.properties?.action_link ?? null,
+      reason: error.message,
+    };
   }
   return { sent: false, mode: "invite", reason: error.message };
 }
@@ -239,7 +266,11 @@ export async function sendTeamInviteEmail(
 /** Friendly Hebrew text for a failed invitation e-mail. */
 export function inviteMailFailureText(reason: string | undefined): string {
   const msg = `${reason ?? ""}`.toLowerCase();
-  if (msg.includes("rate limit") || msg.includes("only request this after") || msg.includes("too many")) {
+  if (
+    msg.includes("rate limit") ||
+    msg.includes("only request this after") ||
+    msg.includes("too many")
+  ) {
     return "ההזמנה נשמרה, אבל הגענו למגבלת שליחת המיילים. נסי לשלוח שוב בעוד דקה, או שלחי את הקישור בוואטסאפ.";
   }
   return "ההזמנה נשמרה, אבל שליחת המייל נכשלה. אפשר להעתיק את הקישור ולשלוח ידנית בוואטסאפ.";
@@ -277,14 +308,18 @@ export async function buildInviteLink(
  * Detect which pending invites were already opened: the invited address exists in
  * Auth with a confirmed e-mail or a sign-in. Persists opened_at so the status sticks.
  */
-export async function syncInviteOpenState<T extends { id: string; email: string; opened_at: string | null }>(
-  admin: Admin,
-  invites: T[],
-): Promise<T[]> {
+export async function syncInviteOpenState<
+  T extends { id: string; email: string; opened_at: string | null },
+>(admin: Admin, invites: T[]): Promise<T[]> {
   const unopened = invites.filter((i) => !i.opened_at);
   if (unopened.length === 0) return invites;
 
-  let users: Array<{ email?: string | null; email_confirmed_at?: string | null; last_sign_in_at?: string | null; confirmed_at?: string | null }> = [];
+  let users: Array<{
+    email?: string | null;
+    email_confirmed_at?: string | null;
+    last_sign_in_at?: string | null;
+    confirmed_at?: string | null;
+  }> = [];
   try {
     const { data } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     users = data?.users ?? [];
@@ -296,7 +331,8 @@ export async function syncInviteOpenState<T extends { id: string; email: string;
   const updates: Array<{ id: string; opened_at: string }> = [];
   for (const invite of unopened) {
     const user = byEmail.get(invite.email.toLowerCase());
-    const openedAt = user?.email_confirmed_at ?? user?.confirmed_at ?? user?.last_sign_in_at ?? null;
+    const openedAt =
+      user?.email_confirmed_at ?? user?.confirmed_at ?? user?.last_sign_in_at ?? null;
     if (openedAt) updates.push({ id: invite.id, opened_at: openedAt });
   }
   if (updates.length === 0) return invites;

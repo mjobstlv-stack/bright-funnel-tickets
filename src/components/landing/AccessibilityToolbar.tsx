@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "eventos-a11y";
 
-export function AccessibilityToolbar({ labels }: { labels: { open: string; fontSize: string; highContrast: string; reset: string; close: string } }) {
+export function AccessibilityToolbar({
+  labels,
+}: {
+  labels: { open: string; fontSize: string; highContrast: string; reset: string; close: string };
+}) {
   const [open, setOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const [highContrast, setHighContrast] = useState(false);
@@ -31,7 +35,10 @@ export function AccessibilityToolbar({ labels }: { labels: { open: string; fontS
   return (
     <div className="fixed bottom-6 left-6 z-50" dir="rtl">
       {open ? (
-        <div className="bg-cream border-2 border-ink rounded-2xl shadow-[6px_6px_0_0_var(--ink)] p-4 w-56" dir="auto">
+        <div
+          className="bg-cream border-2 border-ink rounded-2xl shadow-[6px_6px_0_0_var(--ink)] p-4 w-56"
+          dir="auto"
+        >
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-bold">{labels.open}</span>
             <button
@@ -54,7 +61,9 @@ export function AccessibilityToolbar({ labels }: { labels: { open: string; fontS
                 >
                   −
                 </button>
-                <span className="text-sm font-semibold flex-1 text-center">{Math.round(scale * 100)}%</span>
+                <span className="text-sm font-semibold flex-1 text-center">
+                  {Math.round(scale * 100)}%
+                </span>
                 <button
                   onClick={() => setScale((s) => Math.min(1.5, s + 0.15))}
                   className="size-9 rounded-full border-2 border-ink font-bold hover:bg-ink/5"
@@ -73,12 +82,17 @@ export function AccessibilityToolbar({ labels }: { labels: { open: string; fontS
                 aria-checked={highContrast}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full border-2 border-ink transition ${highContrast ? "bg-ink" : "bg-cream"}`}
               >
-                <span className={`inline-block size-4 rounded-full bg-current transition-transform ${highContrast ? "translate-x-5" : "translate-x-1"}`} />
+                <span
+                  className={`inline-block size-4 rounded-full bg-current transition-transform ${highContrast ? "translate-x-5" : "translate-x-1"}`}
+                />
               </button>
             </label>
 
             <button
-              onClick={() => { setScale(1); setHighContrast(false); }}
+              onClick={() => {
+                setScale(1);
+                setHighContrast(false);
+              }}
               className="w-full rounded-full border-2 border-ink text-sm font-semibold py-2 hover:bg-ink/5"
             >
               {labels.reset}

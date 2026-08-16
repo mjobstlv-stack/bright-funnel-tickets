@@ -48,9 +48,10 @@ agent-driven analysis**, run in module-sized phases rather than one giant
 pass.
 
 Rejected alternatives:
-- *Pure static/code-review QA* (no live run) — faster but doesn't satisfy the
+
+- _Pure static/code-review QA_ (no live run) — faster but doesn't satisfy the
   user's explicit ask to actually exercise the live app with real login.
-- *One-shot exhaustive run across all modules* — the app has ~20+
+- _One-shot exhaustive run across all modules_ — the app has ~20+
   authenticated routes plus public booking pages; attempting full
   field-level coverage in a single pass is unrealistic to deliver reliably
   in one sitting. Phasing lets us validate the process and report format

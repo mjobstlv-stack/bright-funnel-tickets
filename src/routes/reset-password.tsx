@@ -24,7 +24,9 @@ function ResetPasswordPage() {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
     });
-    supabase.auth.getSession().then(({ data }) => { if (data.session) setReady(true); });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setReady(true);
+    });
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -37,24 +39,41 @@ function ResetPasswordPage() {
       toast.success(t("הסיסמה עודכנה. מפנה…", "Password updated. Redirecting…"));
       nav({ to: "/dashboard" });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("עדכון הסיסמה נכשל", "Failed to update password"));
+      toast.error(
+        err instanceof Error ? err.message : t("עדכון הסיסמה נכשל", "Failed to update password"),
+      );
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fafafa] px-4 py-12" dir={dir}>
+    <div
+      className="min-h-screen flex items-center justify-center bg-[#fafafa] px-4 py-12"
+      dir={dir}
+    >
       <div className="w-full max-w-md">
         <Card className="p-8 shadow-sm border-black/10">
-          <h1 className="text-2xl font-display tracking-tight">{t("הגדרת סיסמה חדשה", "Set a new password")}</h1>
+          <h1 className="text-2xl font-display tracking-tight">
+            {t("הגדרת סיסמה חדשה", "Set a new password")}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {ready ? t("הזיני סיסמה חדשה לחשבון שלך.", "Enter a new password for your account.") : t("ממתין לקישור לאיפוס…", "Waiting for reset link…")}
+            {ready
+              ? t("הזיני סיסמה חדשה לחשבון שלך.", "Enter a new password for your account.")
+              : t("ממתין לקישור לאיפוס…", "Waiting for reset link…")}
           </p>
           <form className="mt-6 space-y-4" onSubmit={submit}>
             <div>
               <Label htmlFor="password">{t("סיסמה חדשה", "New password")}</Label>
-              <Input id="password" type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1.5" />
+              <Input
+                id="password"
+                type="password"
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="mt-1.5"
+              />
             </div>
             <Button type="submit" disabled={busy || !ready} className="w-full h-11 rounded-full">
               {busy ? "…" : t("עדכון סיסמה", "Update password")}

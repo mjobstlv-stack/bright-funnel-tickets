@@ -1,13 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import {
-  Calendar,
-  CalendarDays,
-  Home,
-  ShieldAlert,
-  ShieldCheck,
-  UserCog,
-} from "lucide-react";
+import { Calendar, CalendarDays, Home, ShieldAlert, ShieldCheck, UserCog } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -27,7 +20,18 @@ import logoAsset from "@/assets/eventos-logo.svg.asset.json";
 import { useLang } from "@/lib/i18n";
 import { amIPlatformAdmin } from "@/lib/admin.functions";
 
-type Item = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; exact?: boolean; children?: Array<{ to: string; label: string; icon: React.ComponentType<{ className?: string }>; exact?: boolean }> };
+type Item = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+  children?: Array<{
+    to: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    exact?: boolean;
+  }>;
+};
 
 export function AppSidebar() {
   const { t, dir } = useLang();
@@ -58,7 +62,14 @@ export function AppSidebar() {
           to: "/events",
           label: t("כל האירועים", "All events"),
           icon: Calendar,
-          children: [{ to: "/events/new", label: t("אירוע חדש", "New event"), icon: CalendarDays, exact: true }],
+          children: [
+            {
+              to: "/events/new",
+              label: t("אירוע חדש", "New event"),
+              icon: CalendarDays,
+              exact: true,
+            },
+          ],
         },
         { to: "/reviews", label: t("אישורי כניסה", "Entry approvals"), icon: ShieldCheck },
       ],
@@ -68,7 +79,9 @@ export function AppSidebar() {
   if (isPlatformAdmin) {
     groups.push({
       label: t("ניהול מערכת", "System admin"),
-      items: [{ to: "/admin", label: t("לקוחות ותשלומים", "Customers & billing"), icon: ShieldAlert }],
+      items: [
+        { to: "/admin", label: t("לקוחות ותשלומים", "Customers & billing"), icon: ShieldAlert },
+      ],
     });
   }
 
@@ -87,7 +100,11 @@ export function AppSidebar() {
               <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild isActive={isActive(item.to, item.exact)} tooltip={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.to, item.exact)}
+                      tooltip={item.label}
+                    >
                       <Link to={item.to}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
@@ -97,7 +114,10 @@ export function AppSidebar() {
                       <SidebarMenuSub>
                         {item.children.map((child) => (
                           <SidebarMenuSubItem key={child.to}>
-                            <SidebarMenuSubButton asChild isActive={isActive(child.to, child.exact)}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={isActive(child.to, child.exact)}
+                            >
                               <Link to={child.to}>
                                 <child.icon className="h-3.5 w-3.5" />
                                 <span>{child.label}</span>

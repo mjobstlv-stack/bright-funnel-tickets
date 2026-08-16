@@ -21,13 +21,15 @@ import {
   updateTeamMember,
 } from "@/lib/team.functions";
 
-
 export const Route = createFileRoute("/_authenticated/team")({
   component: TeamPage,
   head: () => ({
     meta: [
       { title: "צוות והרשאות | Event OS" },
-      { name: "description", content: "ניהול עד 4 משתמשים לעסק, הרשאות ויומן פעילות עם טביעת אצבע דיגיטלית לכל פעולה." },
+      {
+        name: "description",
+        content: "ניהול עד 4 משתמשים לעסק, הרשאות ויומן פעילות עם טביעת אצבע דיגיטלית לכל פעולה.",
+      },
       { property: "og:title", content: "צוות והרשאות | Event OS" },
       { property: "og:description", content: "ניהול משתמשים, תפקידים ויומן פעילות מלא." },
       { property: "og:type", content: "website" },
@@ -54,15 +56,25 @@ function TeamPage() {
 
   type Invite = Team["invites"][number];
   const inviteStatus = (i: Invite) => {
-    if (i.opened_at) return { key: "opened" as const, label: t("נפתחה", "Opened"), variant: "default" as const };
-    if (i.mail_status === "sent") return { key: "sent" as const, label: t("נשלחה", "Sent"), variant: "secondary" as const };
+    if (i.opened_at)
+      return { key: "opened" as const, label: t("נפתחה", "Opened"), variant: "default" as const };
+    if (i.mail_status === "sent")
+      return { key: "sent" as const, label: t("נשלחה", "Sent"), variant: "secondary" as const };
     if (i.mail_status === "failed")
-      return { key: "failed" as const, label: t("השליחה נכשלה", "Send failed"), variant: "destructive" as const };
+      return {
+        key: "failed" as const,
+        label: t("השליחה נכשלה", "Send failed"),
+        variant: "destructive" as const,
+      };
     return { key: "pending" as const, label: t("ממתינה", "Pending"), variant: "outline" as const };
   };
 
   const roleLabel = (r: Role) =>
-    r === "admin" ? t("אדמין", "Admin") : r === "manager" ? t("מנהל/ת משמרת", "Manager") : t("עובד/ת", "Staff");
+    r === "admin"
+      ? t("אדמין", "Admin")
+      : r === "manager"
+        ? t("מנהל/ת משמרת", "Manager")
+        : t("עובד/ת", "Staff");
 
   const inviteRedirect = () => `${window.location.origin}/reset-password`;
 
@@ -87,12 +99,17 @@ function TeamPage() {
       `הוזמנת ל-Event OS. היכנסי ל-${window.location.origin}/auth עם הכתובת ${email} ולחצי על "שכחת סיסמה?" כדי לקבוע סיסמה.`,
       `You've been invited to Event OS. Go to ${window.location.origin}/auth with ${email} and use "Forgot password?" to set a password.`,
     );
-    await copyToClipboard(text, t("ההוראות הועתקו — אפשר לשלוח בוואטסאפ", "Copied — send it over WhatsApp"));
+    await copyToClipboard(
+      text,
+      t("ההוראות הועתקו — אפשר לשלוח בוואטסאפ", "Copied — send it over WhatsApp"),
+    );
   }
 
-
   async function refresh() {
-    const [teamData, logData] = await Promise.all([getTeam(), getActivityLog({ data: { limit: 100 } })]);
+    const [teamData, logData] = await Promise.all([
+      getTeam(),
+      getActivityLog({ data: { limit: 100 } }),
+    ]);
     setTeam(teamData);
     setLog(logData);
   }
@@ -120,7 +137,9 @@ function TeamPage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-3xl font-display tracking-tight">{t("צוות והרשאות", "Team & permissions")}</h1>
+      <h1 className="text-3xl font-display tracking-tight">
+        {t("צוות והרשאות", "Team & permissions")}
+      </h1>
       <p className="mt-1 text-sm text-muted-foreground">
         {t(
           `עד ${team.seatLimit} משתמשים לעסק — אדמין אחד ועוד שלושה תחתיו. לכל פעולה נרשמת טביעת אצבע דיגיטלית.`,
@@ -157,7 +176,11 @@ function TeamPage() {
                       value={m.role}
                       disabled={busy}
                       onChange={(e) =>
-                        act(() => updateTeamMember({ data: { memberId: m.id, role: e.target.value as Role } }))
+                        act(() =>
+                          updateTeamMember({
+                            data: { memberId: m.id, role: e.target.value as Role },
+                          }),
+                        )
                       }
                     >
                       <option value="admin">{roleLabel("admin")}</option>
@@ -173,7 +196,11 @@ function TeamPage() {
                         variant="ghost"
                         size="sm"
                         disabled={busy}
-                        onClick={() => act(() => updateTeamMember({ data: { memberId: m.id, is_active: !m.is_active } }))}
+                        onClick={() =>
+                          act(() =>
+                            updateTeamMember({ data: { memberId: m.id, is_active: !m.is_active } }),
+                          )
+                        }
                       >
                         {m.is_active ? t("השהיה", "Suspend") : t("הפעלה", "Activate")}
                       </Button>
@@ -219,7 +246,9 @@ function TeamPage() {
                         disabled={busy}
                         onClick={() =>
                           act(async () => {
-                            const res = await getTeamInviteLink({ data: { id: i.id, redirectTo: inviteRedirect() } });
+                            const res = await getTeamInviteLink({
+                              data: { id: i.id, redirectTo: inviteRedirect() },
+                            });
                             setShowLink({ link: res.link, email: res.email });
                             await copyInviteLink(res.link, res.email);
                           })
@@ -234,13 +263,18 @@ function TeamPage() {
                         disabled={busy}
                         onClick={() =>
                           act(async () => {
-                            const res = await resendTeamInvite({ data: { id: i.id, redirectTo: inviteRedirect() } });
+                            const res = await resendTeamInvite({
+                              data: { id: i.id, redirectTo: inviteRedirect() },
+                            });
                             if (res.link) {
                               setShowLink({ link: res.link, email: i.email });
                             } else {
                               toast.success(
                                 res.mailMode === "reset"
-                                  ? t("נשלח מייל לקביעת סיסמה (הכתובת כבר רשומה)", "Sent a set-password e-mail (address already registered)")
+                                  ? t(
+                                      "נשלח מייל לקביעת סיסמה (הכתובת כבר רשומה)",
+                                      "Sent a set-password e-mail (address already registered)",
+                                    )
                                   : t("מייל ההזמנה נשלח שוב", "Invitation e-mail sent again"),
                               );
                             }
@@ -249,21 +283,21 @@ function TeamPage() {
                       >
                         {t("שליחה מחדש", "Resend")}
                       </Button>
+                      <Button variant="ghost" size="sm" onClick={() => copyInviteHint(i.email)}>
+                        {t("העתקת הוראות", "Copy instructions")}
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => copyInviteHint(i.email)}
+                        disabled={busy}
+                        onClick={() => act(() => cancelTeamInvite({ data: { id: i.id } }))}
                       >
-                        {t("העתקת הוראות", "Copy instructions")}
-                      </Button>
-                      <Button variant="ghost" size="sm" disabled={busy} onClick={() => act(() => cancelTeamInvite({ data: { id: i.id } }))}>
                         {t("ביטול", "Cancel")}
                       </Button>
                     </>
                   )}
                 </div>
               ))}
-
             </div>
           </Card>
 
@@ -279,11 +313,20 @@ function TeamPage() {
               <div className="grid sm:grid-cols-3 gap-4">
                 <div>
                   <Label>{t("שם", "Name")}</Label>
-                  <Input className="mt-1.5" value={draft.display_name} onChange={(e) => setDraft({ ...draft, display_name: e.target.value })} />
+                  <Input
+                    className="mt-1.5"
+                    value={draft.display_name}
+                    onChange={(e) => setDraft({ ...draft, display_name: e.target.value })}
+                  />
                 </div>
                 <div>
                   <Label>{t("אימייל", "E-mail")}</Label>
-                  <Input className="mt-1.5" type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} />
+                  <Input
+                    className="mt-1.5"
+                    type="email"
+                    value={draft.email}
+                    onChange={(e) => setDraft({ ...draft, email: e.target.value })}
+                  />
                 </div>
                 <div>
                   <Label>{t("תפקיד", "Role")}</Label>
@@ -303,14 +346,23 @@ function TeamPage() {
                 disabled={busy || seatsLeft <= 0 || !draft.email || !draft.display_name}
                 onClick={() =>
                   act(async () => {
-                    const res = await inviteTeamMember({ data: { ...draft, redirectTo: inviteRedirect() } });
+                    const res = await inviteTeamMember({
+                      data: { ...draft, redirectTo: inviteRedirect() },
+                    });
                     setDraft({ display_name: "", email: "", role: "staff" });
                     if (res.link) {
                       setShowLink({ link: res.link, email: res.email });
                     } else if (!res.mailSent) {
-                      toast.error(res.mailError ?? t("שליחת המייל נכשלה", "Sending the e-mail failed"));
+                      toast.error(
+                        res.mailError ?? t("שליחת המייל נכשלה", "Sending the e-mail failed"),
+                      );
                     } else if (res.mailMode === "reset") {
-                      toast.success(t("נשלח מייל לקביעת סיסמה (הכתובת כבר רשומה)", "Sent a set-password e-mail (address already registered)"));
+                      toast.success(
+                        t(
+                          "נשלח מייל לקביעת סיסמה (הכתובת כבר רשומה)",
+                          "Sent a set-password e-mail (address already registered)",
+                        ),
+                      );
                     } else {
                       toast.success(t("מייל ההזמנה נשלח", "Invitation e-mail sent"));
                     }
@@ -319,7 +371,6 @@ function TeamPage() {
               >
                 {seatsLeft <= 0 ? t("אין מושבים פנויים", "No seats left") : t("הוספה", "Add user")}
               </Button>
-
             </Card>
           )}
         </TabsContent>
@@ -327,13 +378,22 @@ function TeamPage() {
         <TabsContent value="log">
           <Card className="p-6 border-black/10">
             {log.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("אין עדיין פעילות רשומה.", "No recorded activity yet.")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("אין עדיין פעילות רשומה.", "No recorded activity yet.")}
+              </p>
             ) : (
               <div className="divide-y divide-black/5">
                 {log.map((row) => (
-                  <div key={row.id} className="py-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
-                    <span className="font-medium">{row.actor_name ?? row.actor_email ?? t("לא ידוע", "Unknown")}</span>
-                    {row.actor_role && <Badge variant="outline">{roleLabel(row.actor_role as Role)}</Badge>}
+                  <div
+                    key={row.id}
+                    className="py-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm"
+                  >
+                    <span className="font-medium">
+                      {row.actor_name ?? row.actor_email ?? t("לא ידוע", "Unknown")}
+                    </span>
+                    {row.actor_role && (
+                      <Badge variant="outline">{roleLabel(row.actor_role as Role)}</Badge>
+                    )}
                     <span className="text-muted-foreground">{row.summary ?? row.action}</span>
                     <span className="ms-auto text-xs text-muted-foreground">
                       {new Date(row.created_at).toLocaleString("he-IL")}
@@ -361,14 +421,13 @@ function TeamPage() {
             <div className="space-y-3">
               <div className="text-sm">
                 <span className="text-muted-foreground">{t("לכתובת:", "For:")} </span>
-                <span className="font-medium" dir="ltr">{showLink.email}</span>
+                <span className="font-medium" dir="ltr">
+                  {showLink.email}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Input value={showLink.link} readOnly className="font-mono text-xs" dir="ltr" />
-                <Button
-                  size="sm"
-                  onClick={() => copyInviteLink(showLink.link, showLink.email)}
-                >
+                <Button size="sm" onClick={() => copyInviteLink(showLink.link, showLink.email)}>
                   <LinkIcon className="h-4 w-4 me-1.5" />
                   {t("העתקה", "Copy")}
                 </Button>
@@ -378,6 +437,5 @@ function TeamPage() {
         </DialogContent>
       </Dialog>
     </div>
-
   );
 }
