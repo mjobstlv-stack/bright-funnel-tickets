@@ -5,6 +5,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const getPayplusStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    // KNOWN BUG (see README "Known security issue"): this resolves the oldest
+    // org in the whole database, not the caller's org — any authenticated
+    // user can read this org's payment status regardless of membership.
     const { data: org } = await context.supabase
       .from("organizations")
       .select("id")
@@ -46,6 +49,9 @@ export const savePayplusCredentials = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => SaveInput.parse(d))
   .handler(async ({ data, context }) => {
+    // KNOWN BUG (see README "Known security issue"): same wrong-org lookup
+    // as getPayplusStatus above — any authenticated user can overwrite this
+    // org's PayPlus credentials regardless of membership.
     const { data: org, error: orgErr } = await context.supabase
       .from("organizations")
       .select("id")
