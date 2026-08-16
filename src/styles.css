@@ -1,0 +1,281 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@font-face {
+  font-family: "Erstoria";
+  src: url("/__l5e/assets-v1/43098864-dcc1-4bd5-b373-b410a29ee7ff/Erstoria.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-gold-start: var(--gold-start);
+  --color-gold-end: var(--gold-end);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --color-leaf: var(--leaf);
+  --color-blush: var(--blush);
+  --color-butter: var(--butter);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+}
+
+:root {
+  --radius: 0.625rem;
+  /* Event OS — light, calm. White background, black text, gradient accents only */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.16 0 0);
+  --card: oklch(0.99 0 0);
+  --card-foreground: oklch(0.16 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.16 0 0);
+  --primary: oklch(0.16 0 0);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.16 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.16 0 0);
+  --destructive: oklch(0.6 0.22 27);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.92 0 0);
+  --input: oklch(0.94 0 0);
+  --ring: oklch(0.78 0.16 80);
+  /* Logo gradient stops */
+  /* Pink gradient stops (was orange/gold) */
+  --gold-start: oklch(0.92 0.08 350);     /* soft pink */
+  --gold-end: oklch(0.70 0.20 350);       /* hot pink */
+  --gradient-gold: linear-gradient(135deg, var(--gold-start), var(--gold-end));
+  --gradient-gold-soft: linear-gradient(135deg, color-mix(in oklch, var(--gold-start) 22%, transparent), color-mix(in oklch, var(--gold-end) 22%, transparent));
+  --shadow-gold: 0 24px 60px -20px color-mix(in oklch, var(--gold-end) 55%, transparent);
+  /* Pastel palette — orange swapped for pink */
+  --pastel-peach: #f5b8d4;
+  --pastel-orange: #f0a3c8;
+  --pastel-sky: #b8d4f5;
+  --pastel-lavender: #c9bff0;
+  --pastel-pink: #f0bfd8;
+  --pastel-cream: #fbeef3;
+  /* Landing (editorial cream + deep green) */
+  --cream: oklch(0.972 0.017 85);
+  --ink: oklch(0.28 0.06 155);
+  --leaf: oklch(0.42 0.09 155);
+  --blush: oklch(0.9 0.05 5);
+  --butter: oklch(0.92 0.09 90);
+  --gradient-aurora: linear-gradient(115deg, #f5b8d4 0%, #f0bfd8 18%, #d9c9e8 42%, #b8d4f5 68%, #c9bff0 100%);
+  --gradient-aurora-soft: linear-gradient(180deg, #fce4ef 0%, #efe6f4 50%, #e2ecf8 100%);
+  --font-display: "Erstoria", "Space Grotesk", "Heebo", system-ui, sans-serif;
+  --font-sans: "Inter", "Heebo", system-ui, sans-serif;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+}
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@utility text-gold-gradient {
+  background-image: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-gold-gradient {
+  background-image: var(--gradient-gold);
+}
+
+@utility bg-gold-soft {
+  background-image: var(--gradient-gold-soft);
+}
+
+@utility shadow-gold {
+  box-shadow: var(--shadow-gold);
+}
+
+@utility ring-gold {
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--gold-end) 45%, transparent);
+}
+
+@utility radial-glow {
+  background-image: radial-gradient(ellipse at top, color-mix(in oklch, var(--gold-end) 18%, transparent), transparent 60%);
+}
+
+@utility bg-aurora {
+  background-image: var(--gradient-aurora);
+}
+
+@utility bg-aurora-soft {
+  background-image: var(--gradient-aurora-soft);
+}
+
+@utility chevron-bg {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in oklch, currentColor 18%, transparent) 0 14px,
+    transparent 14px 28px
+  );
+}
+
+/* Public event pages: on phones everything is centered and noticeably larger. */
+@media (max-width: 767px) {
+  .public-event {
+    zoom: 1.35;
+    text-align: center;
+    /* keep the zoomed layout from creating a horizontal page scroll,
+       which used to fight the vertical scrolling on phones */
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+  body:has(.public-event) {
+    overflow-x: hidden;
+  }
+
+  .public-event .overflow-x-auto {
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .public-event .overflow-x-auto > * {
+    scroll-snap-align: center;
+  }
+
+  .public-event *:not(input):not(textarea):not(select) {
+    text-align: inherit;
+  }
+
+  .public-event .flex:not(.justify-between):not(.justify-end):not(.overflow-x-auto) {
+    justify-content: center;
+  }
+
+  /* Never shrink-wrap grid items: it made max-w-* cards overflow the phone
+     viewport. Center them with auto margins instead. */
+  .public-event .grid > * {
+    margin-inline: auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .public-event .inline-flex {
+    justify-content: center;
+  }
+}
