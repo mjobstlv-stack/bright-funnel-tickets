@@ -54,6 +54,13 @@ function createSupabaseClient() {
       storage: typeof window !== "undefined" ? localStorage : undefined,
       persistSession: true,
       autoRefreshToken: true,
+      // PKCE (the library default) requires the reset/confirm link to be
+      // opened in the same browser that requested it, because it needs a
+      // locally-stored code verifier. That silently breaks "open the email
+      // on my phone" / "open it in a different browser" — no error, the
+      // link just never establishes a session. Implicit flow carries
+      // everything in the link itself, so it works from any device.
+      flowType: "implicit",
     },
   });
 }
