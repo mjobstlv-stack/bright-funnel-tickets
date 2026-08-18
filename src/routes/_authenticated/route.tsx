@@ -44,12 +44,14 @@ function AuthLayout() {
       return;
     }
     (async () => {
+      // getMyWorkspace auto-creates a default org if the user has none, so
+      // this no longer force-redirects to /onboarding — new users land
+      // straight on their requested page. /onboarding is still reachable if
+      // someone navigates to it directly, but bounces to /dashboard once an
+      // org already exists (org details can be edited from Settings).
       const ws = await getMyWorkspace().catch(() => null);
       setOrg(ws ? { id: ws.orgId, name: ws.orgName, role: ws.role } : null);
       setCheckedOrg(true);
-      if (!ws && router.location.pathname !== "/onboarding") {
-        nav({ to: "/onboarding" });
-      }
       if (ws && router.location.pathname === "/onboarding") {
         nav({ to: "/dashboard" });
       }

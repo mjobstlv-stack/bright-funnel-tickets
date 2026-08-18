@@ -42,7 +42,12 @@ const LogInput = z.object({
   summary: z.string().trim().max(300).optional(),
 });
 
-/** Called after sign-in: joins the org that invited this e-mail, then returns the workspace. */
+/**
+ * Called after sign-in: joins the org that invited this e-mail, then returns
+ * the workspace. If the user has neither an org nor a pending invite, one is
+ * created automatically with a placeholder name — skips the "set up your
+ * organization" step for new users; they can rename it later in Settings.
+ */
 export const getMyWorkspace = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -51,7 +56,16 @@ export const getMyWorkspace = createServerFn({ method: "POST" })
     if (!(await resolveMembership(supabaseAdmin, context.userId))) {
       await acceptInvitesForUser(supabaseAdmin, context.userId, email);
     }
-    const m = await resolveMembership(supabaseAdmin, context.userId);
+    let m = await resolveMembership(supabaseAdmin, context.userId);
+    if (!m) {
+      await supabaseAdmin.from("organizations").insert({
+        owner_id: context.userId,
+        name: "העסק שלי",
+        slug: `org-${context.userId.slice(0, 8)}`,
+        contact_email: email,
+      });
+      m = await resolveMembership(supabaseAdmin, context.userId);
+    }
     if (!m) return null;
     return { orgId: m.orgId, orgName: m.orgName, role: m.role, isOwner: m.isOwner, email };
   });
